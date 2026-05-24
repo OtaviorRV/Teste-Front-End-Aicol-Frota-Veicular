@@ -1,42 +1,54 @@
-import { computed } from '@angular/core';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { Injectable, computed, inject, signal } from '@angular/core'
+import { Router } from '@angular/router'
+import { User } from './user.model'
 
-interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
+@Injectable({ providedIn: 'root' })
+export class AuthStore {
+  readonly token = signal<string | null>(null)
+  readonly user = signal<User | null>(null)
+  readonly isAuthenticated = computed(() => !!this.token())
+
+  private readonly router = inject(Router)
+
+  constructor() {
+    this.hydrateFromStorage()
+  }
+
+  setToken(token: string, user: User): void {
+    this.token.set(token)
+    this.user.set(user)
+    localStorage.setItem('auth_token', token)
+  }
+
+  logout(): void {
+    this.token.set(null)
+    this.user.set(null)
+    localStorage.removeItem('auth_token')
+    this.router.navigate(['/login'])
+  }
+
+  private hydrateFromStorage(): void {
+    const stored = localStorage.getItem('auth_token')
+    if (!stored) return
+    try {
+      const raw = stored.split('.')[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+      const padded = raw.padEnd(Math.ceil(raw.length / 4) * 4, '=')
+      const payload = JSON.parse(atob(padded))
+      if (payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('auth_token')
+        return
+      }
+      this.token.set(stored)
+      this.user.set({
+        id: payload.sub,
+        nickname: payload.nickname ?? payload.sub,
+        name: payload.name ?? payload.nickname ?? payload.sub,
+        email: payload.email ?? '',
+      })
+    } catch {
+      localStorage.removeItem('auth_token')
+    }
+  }
 }
-
-interface AuthState {
-  user: AuthUser | null;
-  token: string | null;
-  loading: boolean;
-}
-
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  loading: false,
-};
-
-export const AuthStore = signalStore(
-  { providedIn: 'root' },
-  withState(initialState),
-  withComputed(({ user, token }) => ({
-    isLoggedIn: computed(() => token() !== null),
-    userName: computed(() => user()?.name ?? ''),
-    userRole: computed(() => user()?.role ?? ''),
-  })),
-  withMethods((store) => ({
-    setAuth(user: AuthUser, token: string): void {
-      patchState(store, { user, token });
-    },
-    clearAuth(): void {
-      patchState(store, { user: null, token: null });
-    },
-    setLoading(loading: boolean): void {
-      patchState(store, { loading });
-    },
-  })),
-);
