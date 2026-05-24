@@ -1,7 +1,7 @@
 [
   {
     "id": "veh-001",
-    "license_plate": "ABC-1234",
+    "license_plate": "ABC1234",
     "chassis": "9BWZZZ377VT004251",
     "renavam": "00123456789",
     "year": 2022,
@@ -17,7 +17,7 @@
   },
   {
     "id": "veh-002",
-    "license_plate": "DEF-5678",
+    "license_plate": "DEF5678",
     "chassis": "9BWZZZ377VT004252",
     "renavam": "00234567890",
     "year": 2021,
@@ -33,7 +33,7 @@
   },
   {
     "id": "veh-003",
-    "license_plate": "GHI-9012",
+    "license_plate": "GHI9012",
     "chassis": "9BWZZZ377VT004253",
     "renavam": "00345678901",
     "year": 2023,
@@ -49,7 +49,7 @@
   },
   {
     "id": "veh-004",
-    "license_plate": "JKL-3456",
+    "license_plate": "JKL3456",
     "chassis": "9BWZZZ377VT004254",
     "renavam": "00456789012",
     "year": 2020,
@@ -65,7 +65,7 @@
   },
   {
     "id": "veh-005",
-    "license_plate": "MNO-7890",
+    "license_plate": "MNO7890",
     "chassis": "9BWZZZ377VT004255",
     "renavam": "00567890123",
     "year": 2022,
@@ -81,7 +81,7 @@
   },
   {
     "id": "veh-006",
-    "license_plate": "PQR-1234",
+    "license_plate": "PQR1234",
     "chassis": "9BWZZZ377VT004256",
     "renavam": "00678901234",
     "year": 2021,
@@ -97,7 +97,7 @@
   },
   {
     "id": "veh-007",
-    "license_plate": "STU-5678",
+    "license_plate": "STU5678",
     "chassis": "9BWZZZ377VT004257",
     "renavam": "00789012345",
     "year": 2023,
@@ -113,7 +113,7 @@
   },
   {
     "id": "veh-008",
-    "license_plate": "VWX-9012",
+    "license_plate": "VWX9012",
     "chassis": "9BWZZZ377VT004258",
     "renavam": "00890123456",
     "year": 2020,
@@ -129,7 +129,7 @@
   },
   {
     "id": "veh-009",
-    "license_plate": "YZA-3456",
+    "license_plate": "YZA3456",
     "chassis": "9BWZZZ377VT004259",
     "renavam": "00901234567",
     "year": 2022,
@@ -145,7 +145,7 @@
   },
   {
     "id": "veh-010",
-    "license_plate": "BCD-7890",
+    "license_plate": "BCD7890",
     "chassis": "9BWZZZ377VT004260",
     "renavam": "01012345678",
     "year": 2021,
@@ -161,7 +161,7 @@
   },
   {
     "id": "veh-011",
-    "license_plate": "EFG-1234",
+    "license_plate": "EFG1234",
     "chassis": "9BWZZZ377VT004261",
     "renavam": "01123456789",
     "year": 2023,
@@ -177,7 +177,7 @@
   },
   {
     "id": "veh-012",
-    "license_plate": "HIJ-5678",
+    "license_plate": "HIJ5678",
     "chassis": "9BWZZZ377VT004262",
     "renavam": "01234567890",
     "year": 2020,

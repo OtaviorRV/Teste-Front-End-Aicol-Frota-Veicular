@@ -1,5 +1,6 @@
 import { BadgeVariant } from '../../../shared/components/atoms/badge/badge.component'
 import { Vehicle, VehicleStatus } from '../models/vehicle.model'
+import { PlateFormatPipe } from '../../../shared/pipes/plate-format.pipe'
 
 export function vehicleStatusVariant(status: VehicleStatus): BadgeVariant {
   const map: Record<VehicleStatus, BadgeVariant> = {
@@ -21,8 +22,8 @@ export function vehicleStatusLabel(status: VehicleStatus): string {
   return map[status]
 }
 
-export function formatPlate(plate: string): string {
-  return plate.replace('-', '·')
+export function formatPlate(plate: string, separator: '-' | '·' | ' ' = '·'): string {
+  return new PlateFormatPipe().transform(plate, separator)
 }
 
 export function canDeleteVehicle(vehicle: Vehicle): { allowed: boolean; reason?: string } {
