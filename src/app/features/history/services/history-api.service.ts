@@ -18,8 +18,8 @@ export class HistoryApiService {
   getAll(filters?: VehicleOperationFilters): Observable<PaginatedOperationResponse> {
     if (environment.useMock) {
       return this.http
-        .get<{ operations: VehicleOperation[] }>('/assets/mocks/seed_vehicles.json')
-        .pipe(map(data => this.applyMockFilters(data.operations ?? [], filters)))
+        .get<VehicleOperation[]>('/assets/mocks/seed_operations.json')
+        .pipe(map(data => this.applyMockFilters(data, filters)))
     }
 
     const params = Object.fromEntries(
