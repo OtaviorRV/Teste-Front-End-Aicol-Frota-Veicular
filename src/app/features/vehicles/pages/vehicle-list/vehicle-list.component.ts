@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnDestroy,
   OnInit,
   TemplateRef,
@@ -10,9 +11,11 @@ import {
   inject,
   signal,
 } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import { DialogRef } from '@angular/cdk/dialog'
-import { take } from 'rxjs/operators'
+import { Subject } from 'rxjs'
+import { debounceTime, take } from 'rxjs/operators'
 
 import { VehicleStore } from '../../store/vehicle.store'
 import { CatalogStore } from '../../../catalog/store/catalog.store'
@@ -215,8 +218,10 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly dialogService = inject(DialogService)
   private readonly toast = inject(ToastService)
   private readonly router = inject(Router)
+  private readonly destroyRef = inject(DestroyRef)
 
   private operationDialogRef?: DialogRef<'registered' | 'cancelled'>
+  private readonly searchInput$ = new Subject<string>()
 
   @ViewChild('statusTemplate', { static: true })
   statusTemplate!: TemplateRef<{ $implicit: Vehicle }>
@@ -251,6 +256,12 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.catalogStore.loadIfEmpty()
     this.vehicleStore.loadVehicles()
+    this.searchInput$.pipe(
+      debounceTime(220),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(term => {
+      this.vehicleStore.applyFilter({ search: term || undefined })
+    })
   }
 
   ngAfterViewInit(): void {
@@ -266,7 +277,7 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onSearchChange(term: string): void {
     this.searchValue.set(term)
-    this.vehicleStore.applyFilter({ search: term || undefined })
+    this.searchInput$.next(term)
   }
 
   onStatusChange(status: string): void {
