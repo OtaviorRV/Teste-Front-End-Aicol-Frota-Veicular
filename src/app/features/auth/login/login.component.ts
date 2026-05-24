@@ -18,11 +18,13 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
   template: `
     <div class="w-full max-w-sm rounded-[9px] border border-border bg-surface-raised p-8">
 
-      <div class="mb-6 flex flex-col gap-1">
-        <span class="text-[22px] font-bold tracking-tight text-text">Aivacol</span>
-        <h1 class="text-[15px] font-semibold text-text">Bem-vindo de volta</h1>
-        <p class="text-[13px] text-muted">Entre com suas credenciais</p>
+      <div class="auth-brand">
+        <div class="brand-mark" style="width: 26px; height: 26px; font-size: 13px">A</div>
+        <span class="brand-name">Aicol</span>
+        <span class="badge outline" style="margin-left: auto; font-size: 10px">Gestão de Frota</span>
       </div>
+      <h1 class="auth-title">Bem-vindo de volta</h1>
+      <p class="auth-subtitle">Entre com suas credenciais para acessar o painel.</p>
 
       @if (loginError()) {
         <div
@@ -38,6 +40,7 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
         <app-input-field
           label="E-mail"
           type="email"
+          placeholder="aivacol@aicol.com.br"
           formControlName="email"
           [required]="true"
           [error]="emailError()"
@@ -47,6 +50,7 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
           <app-input-field
             label="Senha"
             [type]="showPassword() ? 'text' : 'password'"
+            placeholder="••••••••"
             formControlName="password"
             [required]="true"
           />
@@ -73,15 +77,30 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
         <app-button
           type="submit"
           variant="primary"
-          size="md"
+          size="lg"
           [loading]="saving()"
           [disabled]="saving()"
-          class="mt-2 w-full"
+          [block]="true"
         >
-          {{ saving() ? 'Entrando...' : 'Entrar' }}
+          {{ saving() ? 'Entrando…' : 'Entrar' }}
         </app-button>
 
       </form>
+
+      <div style="margin-top: 18px; padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 6px; font-size: 11.5px; color: var(--text-muted); line-height: 1.55">
+        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 4px">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span style="font-weight: 600; color: var(--text)">Credenciais de demonstração</span>
+        </div>
+        <div>
+          E-mail <span class="mono">aivacol&#64;aicol.com.br</span> ·
+          senha <span class="mono">aivacol</span>
+        </div>
+      </div>
     </div>
   `,
 })
