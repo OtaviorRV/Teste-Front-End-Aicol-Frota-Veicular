@@ -15,5 +15,34 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'login' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./core/layout/dashboard-shell/dashboard-shell.component').then(m => m.DashboardShellComponent),
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'vehicles', pathMatch: 'full' },
+      {
+        path: 'vehicles',
+        loadChildren: () =>
+          import('./features/vehicles/vehicles.routes').then(m => m.vehiclesRoutes),
+      },
+      {
+        path: 'catalog',
+        loadChildren: () =>
+          import('./features/catalog/catalog.routes').then(m => m.catalogRoutes),
+      },
+      {
+        path: 'history',
+        loadChildren: () =>
+          import('./features/history/history.routes').then(m => m.historyRoutes),
+      },
+      {
+        path: 'audit',
+        loadChildren: () =>
+          import('./features/audit/audit.routes').then(m => m.auditRoutes),
+      },
+    ],
+  },
+  { path: '**', redirectTo: 'vehicles' },
 ]
