@@ -1,0 +1,20 @@
+[
+  {
+    "id": "brd-001",
+    "name": "Toyota",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "brd-002",
+    "name": "Volkswagen",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "brd-003",
+    "name": "Ford",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  }
+]

@@ -30,5 +30,4 @@ export interface CreateModelDto {
 
 export interface UpdateModelDto {
   name?: string
-  brand_id?: string
 }

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "mod-001",
+    "name": "Corolla",
+    "brand_id": "brd-001",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "mod-002",
+    "name": "Hilux",
+    "brand_id": "brd-001",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "mod-003",
+    "name": "Gol",
+    "brand_id": "brd-002",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "mod-004",
+    "name": "Polo",
+    "brand_id": "brd-002",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "mod-005",
+    "name": "Ka",
+    "brand_id": "brd-003",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  },
+  {
+    "id": "mod-006",
+    "name": "Ranger",
+    "brand_id": "brd-003",
+    "created_at": "2022-01-01T00:00:00Z",
+    "created_by": "admin"
+  }
+]
