@@ -35,7 +35,7 @@ import { ToastHostComponent } from '../../toast/toast-host.component'
     </aside>
 
     <header class="bg-surface-raised border-b border-border flex items-center justify-between px-4" style="grid-area: topbar">
-      <app-topbar />
+      <app-topbar (menuToggle)="toggleSidebar()" />
     </header>
 
     <main class="overflow-auto bg-surface-base" style="grid-area: main">
