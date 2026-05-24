@@ -96,8 +96,7 @@ interface ModelForm {
 })
 export class ModelFormComponent implements OnInit {
   protected readonly data = inject<ModelFormData>(DIALOG_DATA)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly dialogRef = inject<DialogRef<any>>(DialogRef)
+  private readonly dialogRef = inject<DialogRef<'saved' | undefined>>(DialogRef)
   private readonly modelApi = inject(ModelApiService)
   private readonly catalogStore = inject(CatalogStore)
 
