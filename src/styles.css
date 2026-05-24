@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+@theme {
+  /* Surface */
+  --color-surface-base: var(--bg-base);
+  --color-surface-raised: var(--bg-raised);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-sunken: var(--bg-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+
+  /* Text */
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-on-accent: var(--text-on-accent);
+
+  /* Brand */
+  --color-brand-500: var(--accent);
+  --color-brand-400: var(--accent-hover);
+  --color-brand-600: var(--accent-active);
+  --color-brand-soft: var(--accent-soft);
+  --color-brand-soft-text: var(--accent-soft-text);
+
+  /* Semantic */
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-text: var(--danger-text);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-text: var(--info-text);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-neutral-text: var(--neutral-text);
+
+  /* HTTP methods */
+  --color-method-get: var(--method-get);
+  --color-method-post: var(--method-post);
+  --color-method-patch: var(--method-patch);
+  --color-method-delete: var(--method-delete);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
