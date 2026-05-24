@@ -50,3 +50,23 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
+
+/* CDK Dialog — backdrop */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+.dlg-backdrop {
+  background: var(--bg-overlay);
+  animation: fadeIn 0.13s ease-out forwards;
+}
+
+.dlg-panel {
+  animation: slideUp 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
