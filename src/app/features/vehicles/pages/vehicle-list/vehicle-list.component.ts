@@ -16,7 +16,6 @@ import { take } from 'rxjs/operators'
 
 import { VehicleStore } from '../../store/vehicle.store'
 import { CatalogStore } from '../../../catalog/store/catalog.store'
-import { HistoryStore } from '../../../history/store/history.store'
 import { DialogService } from '../../../../core/dialog/dialog.service'
 import { ToastService } from '../../../../core/toast/toast.service'
 import { Vehicle, VehicleStatus } from '../../models/vehicle.model'
@@ -213,7 +212,6 @@ import {
 export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly vehicleStore = inject(VehicleStore)
   protected readonly catalogStore = inject(CatalogStore)
-  private readonly _historyStore = inject(HistoryStore)
   private readonly dialogService = inject(DialogService)
   private readonly toast = inject(ToastService)
   private readonly router = inject(Router)
