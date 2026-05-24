@@ -1,2 +1,2 @@
-export { HlmSelectComponent } from './hlm-select.component';
-export type { SelectOption } from './hlm-select.component';
+export { SelectFieldComponent } from './select-field.component'
+export type { SelectOption } from './select-option.model'
