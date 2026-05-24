@@ -5,11 +5,20 @@ export interface Brand {
   name: string
 }
 
+export interface Model {
+  id: string
+  name: string
+  brand_id: string
+}
+
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
   readonly brands = signal<Brand[]>([])
+  readonly models = signal<Model[]>([])
+  readonly loaded = signal(false)
 
   loadIfEmpty(): void {
-    // populated in catalog tickets (AFV-31+)
+    if (this.loaded()) return
+    this.loaded.set(true)
   }
 }
