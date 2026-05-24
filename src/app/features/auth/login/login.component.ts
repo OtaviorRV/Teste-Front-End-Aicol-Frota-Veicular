@@ -74,7 +74,7 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
           type="submit"
           variant="primary"
           size="md"
-          [pending]="saving()"
+          [loading]="saving()"
           [disabled]="saving()"
           class="mt-2 w-full"
         >

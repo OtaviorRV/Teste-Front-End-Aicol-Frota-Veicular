@@ -93,7 +93,7 @@ function buildCrumbs(url: string): Crumb[] {
           <button
             type="button"
             class="flex h-7 items-center gap-1.5 rounded-[5px] px-2 text-muted transition-colors hover:bg-surface-elevated hover:text-text"
-            (click)="dropdownOpen.update(v => !v)"
+            (click)="toggleDropdown()"
             [attr.aria-expanded]="dropdownOpen()"
             aria-haspopup="menu"
           >
@@ -163,6 +163,10 @@ export class TopbarComponent {
       document.documentElement.setAttribute('data-theme', t)
       localStorage.setItem('theme', t)
     })
+  }
+
+  toggleDropdown(): void {
+    this.dropdownOpen.update(v => !v)
   }
 
   toggleTheme(): void {
