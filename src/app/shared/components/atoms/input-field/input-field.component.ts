@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   booleanAttribute,
-  computed,
   input,
   signal,
 } from '@angular/core'
@@ -20,23 +19,36 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
     },
   ],
   template: `
-    <div class="flex flex-col gap-1">
+    <div class="field">
       @if (label()) {
-        <label [for]="inputId" class="text-[12px] font-medium text-muted leading-none">
+        <label [for]="inputId" class="field-label">
           {{ label() }}
           @if (required()) {
-            <span class="ml-0.5 text-danger" aria-hidden="true">*</span>
+            <span class="req" aria-hidden="true">*</span>
           }
         </label>
       }
 
-      <div class="relative flex items-center">
-        @if (hasLeading()) {
-          <div class="pointer-events-none absolute left-2 flex items-center text-muted">
-            <ng-content select="[leadingIcon]" />
-          </div>
-        }
-
+      @if (hasLeading()) {
+        <div class="input-group">
+          <ng-content select="[leadingIcon]" />
+          <input
+            [id]="inputId"
+            [type]="type()"
+            [placeholder]="placeholder()"
+            [disabled]="innerDisabled()"
+            [value]="innerValue()"
+            [attr.autocomplete]="autocomplete() || null"
+            [attr.aria-invalid]="error() ? true : null"
+            [attr.aria-describedby]="error() ? errorId : null"
+            class="input"
+            [class.has-error]="!!error()"
+            (input)="onInput($event)"
+            (blur)="onBlur()"
+          />
+          <ng-content select="[trailingButton]" />
+        </div>
+      } @else {
         <input
           [id]="inputId"
           [type]="type()"
@@ -46,26 +58,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
           [attr.autocomplete]="autocomplete() || null"
           [attr.aria-invalid]="error() ? true : null"
           [attr.aria-describedby]="error() ? errorId : null"
-          [class]="inputClass()"
+          class="input"
+          [class.has-error]="!!error()"
           (input)="onInput($event)"
           (blur)="onBlur()"
         />
+      }
 
-        @if (pending()) {
-          <div class="absolute right-2 flex items-center">
-            <span class="spinner" aria-hidden="true"></span>
-          </div>
-        } @else {
-          <div class="absolute right-0 flex items-center">
-            <ng-content select="[trailingButton]" />
-          </div>
-        }
-      </div>
-
-      @if (error()) {
-        <p [id]="errorId" class="text-[11.5px] text-danger-text leading-none" role="alert">
-          {{ error() }}
-        </p>
+      @if (pending()) {
+        <div class="field-help">Verificando…</div>
+      } @else if (error()) {
+        <p [id]="errorId" class="field-error" role="alert">{{ error() }}</p>
       }
     </div>
   `,
@@ -91,24 +94,6 @@ export class InputFieldComponent implements ControlValueAccessor {
 
   private onChange: (v: string) => void = () => {}
   private onTouched: () => void = () => {}
-
-  protected readonly inputClass = computed(() => {
-    const base = [
-      'w-full h-[32px] rounded-[5px] border bg-surface-raised',
-      'text-[13px] text-text placeholder:text-muted',
-      'transition-colors outline-none',
-      'focus:border-border-focus focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]',
-      'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface-sunken',
-      this.hasLeading() ? 'pl-8'   : 'pl-2.5',
-      (this.pending() || this.hasTrailing()) ? 'pr-8' : 'pr-2.5',
-    ]
-
-    const borderClass = this.error()
-      ? 'border-danger shadow-[0_0_0_3px_rgba(239,68,68,0.10)]'
-      : 'border-border-strong'
-
-    return [...base, borderClass].join(' ')
-  })
 
   writeValue(v: string): void {
     this.innerValue.set(v ?? '')

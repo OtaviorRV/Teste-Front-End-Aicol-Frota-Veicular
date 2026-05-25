@@ -17,31 +17,24 @@ import { TableColumn } from './table-column.model'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet],
   template: `
-    <div class="w-full overflow-x-auto rounded-[5px]" [class.border]="!noBorder()" [class.border-border]="!noBorder()">
-      <table class="w-full border-collapse text-[13px]">
+    <div class="table-wrap">
+      <table class="data">
 
-        <thead class="sticky top-0 z-10 bg-surface-raised">
+        <thead>
           <tr>
             @if (selectable()) {
-              <th class="w-10 px-3 py-2.5 border-b border-border text-left">
+              <th style="width:40px">
                 <input
                   type="checkbox"
                   [checked]="allSelected()"
                   [indeterminate]="someSelected()"
                   (change)="toggleAll()"
-                  class="cursor-pointer accent-brand-500"
                   aria-label="Selecionar todos"
                 />
               </th>
             }
             @for (col of columns(); track col.key) {
-              <th
-                [style.width]="col.width ?? 'auto'"
-                class="px-3.5 py-2.5 text-[11.5px] font-[550] uppercase tracking-[0.04em] text-subtle border-b border-border"
-                [class.text-left]="!col.align || col.align === 'left'"
-                [class.text-center]="col.align === 'center'"
-                [class.text-right]="col.align === 'right'"
-              >
+              <th [style.width]="col.width ?? 'auto'" [class]="thClass(col)">
                 @if (col.headerTemplate) {
                   <ng-container [ngTemplateOutlet]="col.headerTemplate" />
                 } @else {
@@ -54,55 +47,48 @@ import { TableColumn } from './table-column.model'
 
         <tbody>
           @if (loading()) {
-            @for (i of ghostRows(); track i; let isLastRow = $last) {
+            @for (i of ghostRows(); track i) {
               <tr>
                 @if (selectable()) {
-                  <td [class]="isLastRow ? 'px-3 py-2.5 align-middle' : 'px-3 py-2.5 align-middle border-b border-border'">
-                    <div class="skeleton h-4 w-4"></div>
-                  </td>
+                  <td><div class="skeleton" style="height:14px;width:14px"></div></td>
                 }
                 @for (col of columns(); track col.key) {
-                  <td [class]="isLastRow ? 'px-3.5 py-2.5' : 'px-3.5 py-2.5 border-b border-border'">
-                    <div class="skeleton h-[14px]"
-                         [style.width]="col.width ?? '80%'">
-                    </div>
+                  <td>
+                    <div class="skeleton" style="height:14px" [style.width]="col.width ? '60%' : '80%'"></div>
                   </td>
                 }
               </tr>
             }
           } @else if (rows().length === 0) {
             <tr>
-              <td [attr.colspan]="columnSpan()" class="px-3.5 py-8 text-center text-muted">
+              <td [attr.colspan]="columnSpan()" style="text-align:center;padding:0">
                 @if (emptyTemplate()) {
                   <ng-container [ngTemplateOutlet]="emptyTemplate()!" />
                 } @else {
-                  Nenhum resultado encontrado.
+                  <span style="color:var(--text-muted)">Nenhum resultado encontrado.</span>
                 }
               </td>
             </tr>
           } @else {
-            @for (row of rows(); track row.id; let isLastRow = $last) {
+            @for (row of rows(); track row.id) {
               <tr [class]="getRowClass(row)">
                 @if (selectable()) {
-                  <td [class]="getCheckboxCellClass(isLastRow)">
+                  <td>
                     <input
                       type="checkbox"
                       [checked]="selectedIds().has(row.id)"
                       (change)="toggleRow(row.id)"
-                      class="cursor-pointer accent-brand-500"
                       [attr.aria-label]="'Selecionar linha ' + row.id"
                     />
                   </td>
                 }
                 @for (col of columns(); track col.key) {
-                  <td [class]="getCellClass(isLastRow, col)">
+                  <td [class]="getCellClass(col)">
                     @if (col.cellTemplate) {
-                      <div [class]="col.action ? 'flex items-center justify-end gap-0.5' : ''">
-                        <ng-container
-                          [ngTemplateOutlet]="col.cellTemplate"
-                          [ngTemplateOutletContext]="{ $implicit: row }"
-                        />
-                      </div>
+                      <ng-container
+                        [ngTemplateOutlet]="col.cellTemplate"
+                        [ngTemplateOutletContext]="{ $implicit: row }"
+                      />
                     } @else if (col.render) {
                       {{ col.render(row) }}
                     } @else {
@@ -127,8 +113,7 @@ export class DataTableComponent<T extends { id: string }> {
   readonly selectable    = input(false, { transform: booleanAttribute })
   readonly noBorder      = input(false, { transform: booleanAttribute })
   readonly emptyTemplate = input<TemplateRef<void> | null>(null)
-
-  readonly rowClass        = input<((row: T) => string) | null>(null)
+  readonly rowClass      = input<((row: T) => string) | null>(null)
 
   readonly rowAction       = output<{ action: string; row: T }>()
   readonly selectionChange = output<Set<string>>()
@@ -156,21 +141,19 @@ export class DataTableComponent<T extends { id: string }> {
   }
 
   protected getRowClass(row: T): string {
-    const base = 'transition-colors duration-[70ms] hover:bg-surface-elevated'
-    const selected = this.selectedIds().has(row.id) ? 'bg-brand-soft' : ''
+    const selected = this.selectedIds().has(row.id) ? 'row-selected' : ''
     const extra = this.rowClass()?.(row) ?? ''
-    return [base, selected, extra].filter(Boolean).join(' ')
+    return [selected, extra].filter(Boolean).join(' ')
   }
 
-  protected getCellClass(isLast: boolean, col: TableColumn<T>): string {
-    const border = isLast ? '' : 'border-b border-border'
-    const align = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''
+  protected getCellClass(col: TableColumn<T>): string {
+    const align = col.align === 'right' ? 'col-right' : col.align === 'center' ? 'col-center' : ''
     const extra = col.cellClass ?? ''
-    return ['px-3.5 py-2.5 align-middle', border, align, extra].filter(Boolean).join(' ')
+    return [align, extra].filter(Boolean).join(' ')
   }
 
-  protected getCheckboxCellClass(isLast: boolean): string {
-    return ['px-3 py-2.5 align-middle', isLast ? '' : 'border-b border-border'].filter(Boolean).join(' ')
+  protected thClass(col: TableColumn<T>): string {
+    return col.align === 'right' ? 'col-right' : col.align === 'center' ? 'col-center' : ''
   }
 
   protected toggleRow(id: string): void {
@@ -184,9 +167,7 @@ export class DataTableComponent<T extends { id: string }> {
 
   protected toggleAll(): void {
     const allIds = this.rows().map(r => r.id)
-    const next = this.allSelected()
-      ? new Set<string>()
-      : new Set(allIds)
+    const next = this.allSelected() ? new Set<string>() : new Set(allIds)
     this.selectedIds.set(next)
     this.selectionChange.emit(new Set(next))
   }

@@ -51,7 +51,7 @@ import {
           <h1 class="page-title">Veículos</h1>
           <p class="page-subtitle">{{ counterText() }}</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div style="display:flex;align-items:center;gap:8px">
           <button
             type="button"
             title="Recarregar"
@@ -236,22 +236,22 @@ import {
       <div class="cell-actions">
         <button
           type="button"
-          title="Editar"
-          (click)="edit(v)"
-          class="btn icon"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-        </button>
-        <button
-          type="button"
           title="Registrar operação"
           (click)="openOperation(v)"
           class="btn icon"
         >
           <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          title="Editar"
+          (click)="edit(v)"
+          class="btn icon"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
         </button>
         <button
@@ -324,7 +324,7 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly vehicleStatusVariant = vehicleStatusVariant
   protected readonly canDeleteVehicle = canDeleteVehicle
   protected readonly vehicleRowClass = (v: Vehicle): string =>
-    v.status === 'inativo' ? 'opacity-50' : ''
+    v.status === 'inativo' ? 'dimmed' : ''
 
   ngOnInit(): void {
     this.catalogStore.loadIfEmpty()
@@ -340,9 +340,9 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.columns.set([
       { key: 'license_plate', label: 'Placa', width: '120px', cellTemplate: this.plateTemplate },
-      { key: 'brand_name',    label: 'Marca' },
+      { key: 'brand_name',    label: 'Marca',  cellClass: 'fw-500' },
       { key: 'model_name',    label: 'Modelo' },
-      { key: 'year',          label: 'Ano',       width: '70px' },
+      { key: 'year',          label: 'Ano',       width: '70px', cellClass: 'mono' },
       { key: 'status',        label: 'Status',    width: '140px', cellTemplate: this.statusTemplate },
       { key: 'last_odometer_km', label: 'Odômetro',  width: '110px', align: 'right',  cellClass: 'font-mono tabular-nums text-muted', render: v => formatKm(v.last_odometer_km) },
       { key: 'operation_count', label: 'Operações', width: '90px',  align: 'center', cellClass: 'text-muted', render: v => String(v.operation_count ?? 0) },

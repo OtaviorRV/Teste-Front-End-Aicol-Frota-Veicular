@@ -37,7 +37,7 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
         </div>
       }
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" noValidate>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:16px" noValidate>
 
         <app-input-field
           label="E-mail"
