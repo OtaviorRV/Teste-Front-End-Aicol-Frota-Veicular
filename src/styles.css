@@ -21,3 +21,13 @@ table.data tbody tr.row-selected td {
   border-radius: 4px;
   background: var(--bg-elevated);
 }
+
+@media (max-width: 639px) {
+  .page { padding: 16px 12px 48px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .col-2 { grid-column: span 1; }
+}
+
+@media (max-width: 767px) {
+  .cdk-overlay-pane { max-width: 95vw !important; width: 95vw !important; }
+}

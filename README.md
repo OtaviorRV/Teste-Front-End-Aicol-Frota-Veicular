@@ -1,6 +1,6 @@
 # Aivacol Fleet — Frontend
 
-Teste técnico: plataforma de gestão de frota para locadoras. Desenvolvido com Angular 19, signals e Tailwind CSS v4.
+Teste técnico: plataforma de gestão de frota para locadoras. Desenvolvido com Angular 19, signals e Design System CSS próprio.
 
 ---
 
@@ -10,8 +10,7 @@ Teste técnico: plataforma de gestão de frota para locadoras. Desenvolvido com 
 |---|---|
 | Framework | Angular 19 (standalone components) |
 | Estado | @ngrx/signals (Signal Store) |
-| Estilo | Tailwind CSS v4 com `@theme` (tokens custom) |
-| UI | Spartan/UI / Helm |
+| Estilo | Design System Aicol (CSS tokens + classes utilitárias) |
 | TypeScript | strict mode |
 | Testes | Karma + Jasmine |
 
