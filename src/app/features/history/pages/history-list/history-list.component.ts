@@ -104,7 +104,7 @@ import { operationBadgeVariant, operationLabel } from '../../utils/operation.uti
 
         @if (!store.loading() && store.total() > 0) {
           <div class="pagination">
-            <span [innerHTML]="rangeText()"></span>
+            <span>Exibindo <strong>{{ rangeStart() }}–{{ rangeEnd() }}</strong> de <strong>{{ store.total() }}</strong></span>
             <div class="controls">
               <div class="select-wrap" style="width: auto">
                 <select
@@ -248,13 +248,14 @@ export class HistoryListComponent implements OnInit, AfterViewInit {
     Math.max(1, Math.ceil(this.store.total() / this.store.filters().page_size))
   )
 
-  protected readonly rangeText = computed(() => {
+  protected readonly rangeStart = computed(() => {
     const { page, page_size } = this.store.filters()
-    const total = this.store.total()
-    if (total === 0) return ''
-    const start = (page - 1) * page_size + 1
-    const end   = Math.min(page * page_size, total)
-    return `Exibindo <strong style="font-weight:600;color:var(--text)">${start}–${end}</strong> de <strong style="font-weight:600;color:var(--text)">${total}</strong>`
+    return this.store.total() === 0 ? 0 : (page - 1) * page_size + 1
+  })
+
+  protected readonly rangeEnd = computed(() => {
+    const { page, page_size } = this.store.filters()
+    return Math.min(page * page_size, this.store.total())
   })
 
   protected readonly opLabel   = (t: OperationType) => operationLabel(t)
