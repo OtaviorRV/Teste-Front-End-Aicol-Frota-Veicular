@@ -385,6 +385,7 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
     this.catalogStore.loadIfEmpty()
     this.buildForm()
     this.setupPlateNormalization()
+    this.setupChassisNormalization()
     this.setupBrandCascade()
 
     if (this.isEdit()) {
@@ -456,6 +457,19 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
 
   private setupPlateNormalization(): void {
     const ctrl = this.form.controls.license_plate
+    ctrl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(v => {
+      if (!ctrl.dirty) return
+      const normalized = v.toUpperCase()
+      if (normalized !== v) {
+        ctrl.setValue(normalized, { emitEvent: false })
+      }
+    })
+  }
+
+  private setupChassisNormalization(): void {
+    const ctrl = this.form.controls.chassis
     ctrl.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(v => {
