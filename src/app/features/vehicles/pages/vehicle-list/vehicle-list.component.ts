@@ -342,7 +342,7 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
       { key: 'license_plate', label: 'Placa', width: '120px', cellTemplate: this.plateTemplate },
       { key: 'brand_name',    label: 'Marca',  cellClass: 'fw-500' },
       { key: 'model_name',    label: 'Modelo' },
-      { key: 'year',          label: 'Ano',       width: '70px', cellClass: 'mono' },
+      { key: 'year',          label: 'Ano',       width: '70px', align: 'center', cellClass: 'mono' },
       { key: 'status',        label: 'Status',    width: '140px', cellTemplate: this.statusTemplate },
       { key: 'last_odometer_km', label: 'Odômetro',  width: '110px', align: 'right',  cellClass: 'font-mono tabular-nums text-muted', render: v => formatKm(v.last_odometer_km) },
       { key: 'operation_count', label: 'Operações', width: '90px',  align: 'center', cellClass: 'text-muted', render: v => String(v.operation_count ?? 0) },

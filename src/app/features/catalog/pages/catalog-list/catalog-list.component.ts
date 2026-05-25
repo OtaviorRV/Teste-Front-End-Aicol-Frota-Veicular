@@ -272,10 +272,10 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.brandColumns.set([
       { key: 'name',          label: 'Nome',     cellClass: 'fw-500' },
-      { key: 'model_count',   label: 'Modelos',  width: '110px', align: 'right',
+      { key: 'model_count',   label: 'Modelos',  width: '110px', align: 'center',
         render: (r: Brand) => String(this.catalogStore.modelCountByBrand().get(r.id) ?? 0),
         cellClass: 'mono text-sm' },
-      { key: 'vehicle_count', label: 'Veículos', width: '110px', align: 'right',
+      { key: 'vehicle_count', label: 'Veículos', width: '110px', align: 'center',
         render: (r: Brand) => String(this.vehicleCountByBrand().get(r.id) ?? 0),
         cellClass: 'mono text-sm' },
       { key: 'created_at',    label: 'Criada em', width: '170px',
@@ -287,7 +287,7 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
     this.modelColumns.set([
       { key: 'name',          label: 'Nome',    cellClass: 'fw-500' },
       { key: 'brand_id',      label: 'Marca',   width: '180px', cellTemplate: this.brandBadgeTpl },
-      { key: 'vehicle_count', label: 'Veículos', width: '110px', align: 'right',
+      { key: 'vehicle_count', label: 'Veículos', width: '110px', align: 'center',
         render: (r: VehicleModel) => String(this.vehicleCountByModel().get(r.id) ?? 0),
         cellClass: 'mono text-sm' },
       { key: 'created_at',   label: 'Criado em', width: '170px',
