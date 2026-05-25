@@ -72,23 +72,68 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
                     placeholder="Buscar marca…"
                     class="input"
                     [value]="brandSearch()"
-                    (input)="brandSearch.set($any($event.target).value)"
+                    (input)="setBrandSearch($any($event.target).value)"
                   />
                 </div>
               </div>
             </div>
             <div class="right" style="font-size:12.5px;color:var(--text-muted)">
-              {{ catalogStore.brands().length }} marca(s) · {{ catalogStore.models().length }} modelo(s)
+              {{ filteredBrands().length }} marca(s) · {{ catalogStore.models().length }} modelo(s)
             </div>
           </div>
 
           <app-data-table
-            [rows]="filteredBrands()"
+            [rows]="pagedBrands()"
             [columns]="brandColumns()"
             [loading]="catalogStore.loading()"
             [emptyTemplate]="brandEmptyTpl"
             [noBorder]="true"
           />
+
+          @if (filteredBrands().length > 0) {
+            <div class="pagination">
+              <span>Exibindo <strong>{{ brandRangeStart() }}–{{ brandRangeEnd() }}</strong> de <strong>{{ filteredBrands().length }}</strong></span>
+              <div class="controls">
+                <div class="select-wrap" style="width: auto">
+                  <select
+                    class="select"
+                    style="width: auto; height: 26px; font-size: 12px; padding: 0 26px 0 8px"
+                    [value]="brandPageSize()"
+                    (change)="onBrandPageSizeChange(+$any($event.target).value)"
+                  >
+                    <option value="10">10 / pág</option>
+                    <option value="20">20 / pág</option>
+                    <option value="50">50 / pág</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  class="btn icon"
+                  [disabled]="brandPage() <= 1"
+                  (click)="prevBrandPage()"
+                  aria-label="Página anterior"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+                <span style="font-size: 12.5px; color: var(--text-muted); min-width: 52px; text-align: center">
+                  {{ brandPage() }} / {{ brandTotalPages() }}
+                </span>
+                <button
+                  type="button"
+                  class="btn icon"
+                  [disabled]="brandPage() >= brandTotalPages()"
+                  (click)="nextBrandPage()"
+                  aria-label="Próxima página"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
         } @else {
           <div class="toolbar">
             <div class="left">
@@ -102,12 +147,12 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
                     placeholder="Buscar modelo…"
                     class="input"
                     [value]="modelSearch()"
-                    (input)="modelSearch.set($any($event.target).value)"
+                    (input)="setModelSearch($any($event.target).value)"
                   />
                 </div>
               </div>
               <div class="select-wrap" style="width:180px">
-                <select class="select" [value]="modelBrandFilter()" (change)="modelBrandFilter.set($any($event.target).value)">
+                <select class="select" [value]="modelBrandFilter()" (change)="setModelBrandFilter($any($event.target).value)">
                   <option value="">Todas as marcas</option>
                   @for (b of catalogStore.brands(); track b.id) {
                     <option [value]="b.id">{{ b.name }}</option>
@@ -116,17 +161,62 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
               </div>
             </div>
             <div class="right" style="font-size:12.5px;color:var(--text-muted)">
-              {{ catalogStore.models().length }} modelo(s)
+              {{ filteredModels().length }} modelo(s)
             </div>
           </div>
 
           <app-data-table
-            [rows]="filteredModels()"
+            [rows]="pagedModels()"
             [columns]="modelColumns()"
             [loading]="catalogStore.loading()"
             [emptyTemplate]="modelEmptyTpl"
             [noBorder]="true"
           />
+
+          @if (filteredModels().length > 0) {
+            <div class="pagination">
+              <span>Exibindo <strong>{{ modelRangeStart() }}–{{ modelRangeEnd() }}</strong> de <strong>{{ filteredModels().length }}</strong></span>
+              <div class="controls">
+                <div class="select-wrap" style="width: auto">
+                  <select
+                    class="select"
+                    style="width: auto; height: 26px; font-size: 12px; padding: 0 26px 0 8px"
+                    [value]="modelPageSize()"
+                    (change)="onModelPageSizeChange(+$any($event.target).value)"
+                  >
+                    <option value="10">10 / pág</option>
+                    <option value="20">20 / pág</option>
+                    <option value="50">50 / pág</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  class="btn icon"
+                  [disabled]="modelPage() <= 1"
+                  (click)="prevModelPage()"
+                  aria-label="Página anterior"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+                <span style="font-size: 12.5px; color: var(--text-muted); min-width: 52px; text-align: center">
+                  {{ modelPage() }} / {{ modelTotalPages() }}
+                </span>
+                <button
+                  type="button"
+                  class="btn icon"
+                  [disabled]="modelPage() >= modelTotalPages()"
+                  (click)="nextModelPage()"
+                  aria-label="Próxima página"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
         }
 
       </div>
@@ -145,17 +235,18 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
           </svg>
         </button>
-        <button
-          type="button"
-          class="btn icon"
-          [title]="brandModelCount(brand.id) > 0 ? (brandModelCount(brand.id) + ' modelo(s) vinculado(s)') : 'Excluir'"
-          [disabled]="brandModelCount(brand.id) > 0"
-          (click)="deleteBrand(brand)"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-          </svg>
-        </button>
+        <span [title]="brandModelCount(brand.id) > 0 ? 'Não é possível excluir uma marca com modelos cadastrados (' + brandModelCount(brand.id) + ' modelo(s)).' : ''">
+          <button
+            type="button"
+            class="btn icon"
+            [disabled]="brandModelCount(brand.id) > 0"
+            (click)="deleteBrand(brand)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </span>
       </div>
     </ng-template>
 
@@ -167,17 +258,18 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
           </svg>
         </button>
-        <button
-          type="button"
-          class="btn icon"
-          [title]="modelVehicleCount(model.id) > 0 ? (modelVehicleCount(model.id) + ' veículo(s) vinculado(s)') : 'Excluir'"
-          [disabled]="modelVehicleCount(model.id) > 0 || deletingId() === model.id"
-          (click)="deleteModel(model)"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-          </svg>
-        </button>
+        <span [title]="modelVehicleCount(model.id) > 0 ? 'Não é possível excluir um modelo com veículos cadastrados (' + modelVehicleCount(model.id) + ' veículo(s)).' : ''">
+          <button
+            type="button"
+            class="btn icon"
+            [disabled]="modelVehicleCount(model.id) > 0 || deletingId() === model.id"
+            (click)="deleteModel(model)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </span>
       </div>
     </ng-template>
 
@@ -233,6 +325,11 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
   protected readonly modelBrandFilter = signal('')
   protected readonly deletingId       = signal<string | null>(null)
 
+  protected readonly brandPage     = signal(1)
+  protected readonly brandPageSize = signal(10)
+  protected readonly modelPage     = signal(1)
+  protected readonly modelPageSize = signal(10)
+
   private readonly vehicleCountByModel = signal<Map<string, number>>(new Map())
 
   protected readonly vehicleCountByBrand = computed(() => {
@@ -250,6 +347,24 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
       : this.catalogStore.brands()
   })
 
+  protected readonly pagedBrands = computed(() => {
+    const all   = this.filteredBrands()
+    const start = (this.brandPage() - 1) * this.brandPageSize()
+    return all.slice(start, start + this.brandPageSize())
+  })
+
+  protected readonly brandTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredBrands().length / this.brandPageSize()))
+  )
+
+  protected readonly brandRangeStart = computed(() =>
+    this.filteredBrands().length === 0 ? 0 : (this.brandPage() - 1) * this.brandPageSize() + 1
+  )
+
+  protected readonly brandRangeEnd = computed(() =>
+    Math.min(this.brandPage() * this.brandPageSize(), this.filteredBrands().length)
+  )
+
   protected readonly filteredModels = computed(() => {
     let models = this.catalogStore.models()
     const bf = this.modelBrandFilter()
@@ -258,6 +373,24 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
     if (q) models = models.filter(m => m.name.toLowerCase().includes(q))
     return models
   })
+
+  protected readonly pagedModels = computed(() => {
+    const all   = this.filteredModels()
+    const start = (this.modelPage() - 1) * this.modelPageSize()
+    return all.slice(start, start + this.modelPageSize())
+  })
+
+  protected readonly modelTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredModels().length / this.modelPageSize()))
+  )
+
+  protected readonly modelRangeStart = computed(() =>
+    this.filteredModels().length === 0 ? 0 : (this.modelPage() - 1) * this.modelPageSize() + 1
+  )
+
+  protected readonly modelRangeEnd = computed(() =>
+    Math.min(this.modelPage() * this.modelPageSize(), this.filteredModels().length)
+  )
 
   protected readonly brandColumns = signal<TableColumn<Brand>[]>([])
   protected readonly modelColumns = signal<TableColumn<VehicleModel>[]>([])
@@ -307,6 +440,35 @@ export class CatalogListComponent implements OnInit, AfterViewInit {
       .subscribe(entries => {
         this.vehicleCountByModel.set(new Map(entries))
       })
+  }
+
+  protected setBrandSearch(value: string): void {
+    this.brandSearch.set(value)
+    this.brandPage.set(1)
+  }
+
+  protected prevBrandPage(): void { this.brandPage.update(p => p - 1) }
+  protected nextBrandPage(): void { this.brandPage.update(p => p + 1) }
+  protected onBrandPageSizeChange(size: number): void {
+    this.brandPageSize.set(size)
+    this.brandPage.set(1)
+  }
+
+  protected setModelSearch(value: string): void {
+    this.modelSearch.set(value)
+    this.modelPage.set(1)
+  }
+
+  protected setModelBrandFilter(value: string): void {
+    this.modelBrandFilter.set(value)
+    this.modelPage.set(1)
+  }
+
+  protected prevModelPage(): void { this.modelPage.update(p => p - 1) }
+  protected nextModelPage(): void { this.modelPage.update(p => p + 1) }
+  protected onModelPageSizeChange(size: number): void {
+    this.modelPageSize.set(size)
+    this.modelPage.set(1)
   }
 
   protected brandName(brandId: string): string {

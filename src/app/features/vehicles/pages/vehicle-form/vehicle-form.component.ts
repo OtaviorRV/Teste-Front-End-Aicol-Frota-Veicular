@@ -560,6 +560,7 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
   }
 
   goBack(): void {
+    this.form?.markAsPristine()
     this.router.navigate(['/vehicles'])
   }
 
