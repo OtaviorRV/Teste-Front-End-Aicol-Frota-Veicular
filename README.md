@@ -87,10 +87,10 @@ src/app/
 
 | Arquivo | Conteúdo |
 |---|---|
-| `seed_vehicles.json` | 15 veículos, todos os status |
-| `seed_operations.json` | 20 operações, todos os tipos |
-| `seed_brands.json` | 3 marcas |
-| `seed_models.json` | 6 modelos |
+| `seed_vehicles.json` | 30 veículos, todos os status |
+| `seed_operations.json` | 50 operações, todos os tipos |
+| `seed_brands.json` | 8 marcas |
+| `seed_models.json` | 29 modelos |
 | `seed_audit.json` | 20 entradas de auditoria |
 
 Para usar com backend real: `npm run start:api` (espera `http://localhost:3000`).
