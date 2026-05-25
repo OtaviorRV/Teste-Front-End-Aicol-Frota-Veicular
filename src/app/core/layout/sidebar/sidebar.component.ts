@@ -15,115 +15,110 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: 'display:contents' },
   imports: [RouterLink],
   template: `
-    <div class="flex h-full flex-col bg-surface-raised">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="brand-mark">A</div>
+      <span class="brand-name">Aicol</span>
+    </div>
 
-      <!-- Brand -->
-      <div class="flex h-[48px] shrink-0 items-center gap-2.5 border-b border-border px-4">
-        <div class="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[5px] bg-brand-500 text-[10px] font-bold text-white">
-          A
-        </div>
-        <span class="text-[13.5px] font-semibold text-text">Aicol</span>
-      </div>
+    <!-- Nav -->
+    <nav role="navigation" style="flex:1;overflow-y:auto">
 
-      <!-- Nav -->
-      <nav role="navigation" class="flex flex-1 flex-col overflow-y-auto px-2 py-3">
-
-        <!-- Seção OPERAÇÃO -->
-        <span class="mb-1 px-2 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-subtle">Operação</span>
-
+      <!-- Seção OPERAÇÃO -->
+      <div class="sidebar-section">
+        <span class="sidebar-section-label">Operação</span>
         @for (item of operacaoItems; track item.route) {
-          <div class="sidebar-section" style="padding-top: 0">
-            @if (!item.children) {
+          @if (!item.children) {
+            <a
+              [routerLink]="item.route"
+              [attr.aria-current]="isActive(item.route) ? 'page' : null"
+              [class]="'sidebar-nav-item' + (isActive(item.route) ? ' active' : '')"
+            >
+              <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <a
+              [routerLink]="item.route"
+              [attr.aria-current]="isActiveParent(item) ? 'page' : null"
+              [class]="'sidebar-nav-item' + (isActiveParent(item) ? ' active' : '')"
+            >
+              <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+              <span>{{ item.label }}</span>
+            </a>
+            @for (child of item.children; track child.route) {
               <a
-                [routerLink]="item.route"
-                [attr.aria-current]="isActive(item.route) ? 'page' : null"
-                [class]="'sidebar-nav-item' + (isActive(item.route) ? ' active' : '')"
-              >
-                <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
-                <span>{{ item.label }}</span>
-              </a>
-            } @else {
-              <div [class]="'sidebar-nav-item' + (isActiveParent(item) ? ' active' : '')"
-                   style="cursor: default">
-                <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
-                <span>{{ item.label }}</span>
-              </div>
-              @if (isActiveParent(item)) {
-                @for (child of item.children; track child.route) {
-                  <a
-                    [routerLink]="child.route"
-                    [attr.aria-current]="isActive(child.route) ? 'page' : null"
-                    [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
-                  >{{ child.label }}</a>
-                }
-              }
+                [routerLink]="child.route"
+                [attr.aria-current]="isActive(child.route) ? 'page' : null"
+                [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
+              >{{ child.label }}</a>
             }
-          </div>
-        }
-
-        <!-- Seção CONFIGURAÇÃO -->
-        <span class="mt-2 mb-1 px-2 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-subtle">Configuração</span>
-
-        @for (item of configuracaoItems; track item.route) {
-          <div class="sidebar-section" style="padding-top: 0">
-            @if (!item.children) {
-              <a
-                [routerLink]="item.route"
-                [attr.aria-current]="isActive(item.route) ? 'page' : null"
-                [class]="'sidebar-nav-item' + (isActive(item.route) ? ' active' : '')"
-              >
-                <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
-                <span>{{ item.label }}</span>
-              </a>
-            } @else {
-              <div [class]="'sidebar-nav-item' + (isActiveParent(item) ? ' active' : '')"
-                   style="cursor: default">
-                <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
-                <span>{{ item.label }}</span>
-              </div>
-              @if (isActiveParent(item)) {
-                @for (child of item.children; track child.route) {
-                  <a
-                    [routerLink]="child.route"
-                    [attr.aria-current]="isActive(child.route) ? 'page' : null"
-                    [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
-                  >{{ child.label }}</a>
-                }
-              }
-            }
-          </div>
-        }
-
-      </nav>
-
-      <!-- Footer — User pill -->
-      <div class="sidebar-footer" style="position: relative">
-        <div class="user-pill" (click)="toggleUserMenu()">
-          <div class="avatar">{{ userInitials() }}</div>
-          <div style="flex: 1; min-width: 0">
-            <div class="fw-600 text-sm truncate">{{ user()?.name || user()?.nickname }}</div>
-            <div class="text-xs text-subtle truncate">{{ user()?.email }}</div>
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-subtle">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
-        @if (userMenuOpen()) {
-          <div style="position: absolute; bottom: calc(100% + 4px); left: 0; right: 0; background: var(--bg-raised); border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-overlay); padding: 4px; z-index: 20">
-            <div class="sidebar-nav-item" style="color: var(--danger-text)" (click)="logout(); userMenuOpen.set(false)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="sidebar-nav-icon" aria-hidden="true">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <path d="M16 17l5-5-5-5"/>
-                <path d="M21 12H9"/>
-              </svg>
-              <span>Sair</span>
-            </div>
-          </div>
+          }
         }
       </div>
 
+      <!-- Seção CONFIGURAÇÃO -->
+      <div class="sidebar-section">
+        <span class="sidebar-section-label">Configuração</span>
+        @for (item of configuracaoItems; track item.route) {
+          @if (!item.children) {
+            <a
+              [routerLink]="item.route"
+              [attr.aria-current]="isActive(item.route) ? 'page' : null"
+              [class]="'sidebar-nav-item' + (isActive(item.route) ? ' active' : '')"
+            >
+              <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <a
+              [routerLink]="item.route"
+              [attr.aria-current]="isActiveParent(item) ? 'page' : null"
+              [class]="'sidebar-nav-item' + (isActiveParent(item) ? ' active' : '')"
+            >
+              <span [innerHTML]="icons[item.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+              <span>{{ item.label }}</span>
+            </a>
+            @for (child of item.children; track child.route) {
+              <a
+                [routerLink]="child.route"
+                [attr.aria-current]="isActive(child.route) ? 'page' : null"
+                [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
+              >{{ child.label }}</a>
+            }
+          }
+        }
+      </div>
+
+    </nav>
+
+    <!-- Footer — User pill -->
+    <div class="sidebar-footer" style="position:relative">
+      <div class="user-pill" (click)="toggleUserMenu()">
+        <div class="avatar">{{ userInitials() }}</div>
+        <div style="flex:1;min-width:0">
+          <div class="fw-600 text-sm truncate">{{ user()?.name || user()?.nickname }}</div>
+          <div class="text-xs text-subtle truncate">{{ user()?.email }}</div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--text-subtle)">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </div>
+      @if (userMenuOpen()) {
+        <div style="position:absolute;bottom:calc(100% + 4px);left:0;right:0;background:var(--bg-raised);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow-overlay);padding:4px;z-index:20">
+          <div class="sidebar-nav-item" style="color:var(--danger-text)" (click)="logout(); userMenuOpen.set(false)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="sidebar-nav-icon" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <path d="M16 17l5-5-5-5"/>
+              <path d="M21 12H9"/>
+            </svg>
+            <span>Sair</span>
+          </div>
+        </div>
+      }
     </div>
   `,
 })

@@ -14,19 +14,19 @@ import { IconComponent } from '../../atoms/icon/icon.component'
   imports: [IconComponent],
   template: `
     @if (total() > 0) {
-      <div class="flex items-center justify-between text-[12px] text-muted">
+      <div class="pagination">
 
         <span>
           Exibindo
-          <strong class="font-[600] text-text">{{ from() }}–{{ to() }}</strong>
+          <strong class="fw-600" style="color:var(--text)">{{ from() }}–{{ to() }}</strong>
           de
-          <strong class="font-[600] text-text">{{ total() }}</strong>
+          <strong class="fw-600" style="color:var(--text)">{{ total() }}</strong>
         </span>
 
-        <div class="flex items-center gap-1">
+        <div class="controls">
           <button
             type="button"
-            class="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-border bg-surface text-muted transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+            class="btn icon"
             [disabled]="page() <= 1"
             (click)="pageChange.emit(page() - 1)"
             aria-label="Página anterior"
@@ -34,13 +34,13 @@ import { IconComponent } from '../../atoms/icon/icon.component'
             <app-icon name="chevronL" size="sm" />
           </button>
 
-          <span class="px-2 tabular-nums">
+          <span style="padding:0 8px;font-variant-numeric:tabular-nums">
             Página {{ page() }} de {{ totalPages() }}
           </span>
 
           <button
             type="button"
-            class="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-border bg-surface text-muted transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+            class="btn icon"
             [disabled]="page() >= totalPages()"
             (click)="pageChange.emit(page() + 1)"
             aria-label="Próxima página"

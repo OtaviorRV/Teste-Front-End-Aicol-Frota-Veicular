@@ -35,8 +35,13 @@ interface BrandForm {
   template: `
     <div class="dialog">
 
-      <div class="dialog-header" style="display: flex; align-items: center; justify-content: space-between">
-        <h2 class="dialog-title">{{ data.mode === 'edit' ? 'Editar Marca' : 'Nova Marca' }}</h2>
+      <div class="dialog-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <h2 class="dialog-title">{{ data.mode === 'edit' ? 'Editar marca' : 'Nova marca' }}</h2>
+          <p class="dialog-subtitle">
+            {{ data.mode === 'edit' ? 'Atualize o nome da marca.' : 'Adicione uma nova marca ao catálogo.' }}
+          </p>
+        </div>
         <button type="button" class="btn icon" (click)="close()" aria-label="Fechar">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>

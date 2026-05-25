@@ -1,17 +1,21 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
   OnInit,
   TemplateRef,
   ViewChild,
   computed,
   inject,
+  signal,
 } from '@angular/core'
+import { Subject } from 'rxjs'
+import { debounceTime } from 'rxjs/operators'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { BadgeComponent } from '../../../../shared/components/atoms/badge/badge.component'
 import { DataTableComponent } from '../../../../shared/components/molecules/data-table/data-table.component'
 import { TableColumn } from '../../../../shared/components/molecules/data-table/table-column.model'
-import { PaginationComponent } from '../../../../shared/components/molecules/pagination/pagination.component'
 import { PlateFormatPipe } from '../../../../shared/pipes/plate-format.pipe'
 import { OperationType, VehicleOperation } from '../../models/history.models'
 import { HistoryStore } from '../../store/history.store'
@@ -21,168 +25,273 @@ import { operationBadgeVariant, operationLabel } from '../../utils/operation.uti
   selector: 'app-history-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTableComponent, BadgeComponent, PlateFormatPipe, PaginationComponent],
+  imports: [DataTableComponent, BadgeComponent, PlateFormatPipe],
   template: `
-    <div class="flex flex-col gap-6 p-6">
+    <div class="page">
 
-      <!-- Header -->
-      <div class="flex flex-col gap-0.5">
-        <h1 class="text-[18px] font-[650] text-text leading-snug">Histórico de Operações</h1>
-        <p class="text-[13px] text-muted">Registro completo do ciclo de vida da frota</p>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Histórico de Operações</h1>
+          <p class="page-subtitle">Registro auditável do ciclo de vida da frota — entradas, saídas, manutenções e baixas.</p>
+        </div>
       </div>
 
-      <!-- Filters -->
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="flex flex-col gap-1 min-w-[200px]">
-          <label class="text-[12px] font-medium text-muted leading-none">Buscar placa</label>
-          <input
-            type="text"
-            placeholder="Ex: ABC-1234"
-            class="h-9 rounded-[5px] border border-border bg-surface px-3 text-[13px] text-text placeholder:text-subtle outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
-            (input)="onSearchChange($event)"
-          />
-        </div>
+      <div class="card">
 
-        <div class="flex flex-col gap-1 min-w-[160px]">
-          <label class="text-[12px] font-medium text-muted leading-none">Tipo</label>
-          <select
-            class="h-9 rounded-[5px] border border-border bg-surface px-3 text-[13px] text-text outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors cursor-pointer"
-            (change)="onTypeChange($event)"
-          >
-            @for (opt of operationTypeOptions; track opt.value) {
-              <option [value]="opt.value">{{ opt.label }}</option>
+        <div class="toolbar">
+          <div class="left">
+            <div class="search">
+              <div class="input-group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="leading-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar por placa…"
+                  class="input"
+                  style="padding-right: 36px"
+                  [value]="searchValue()"
+                  (input)="onSearchInput($any($event.target).value)"
+                />
+                @if (searchValue()) {
+                  <button type="button" class="btn icon trailing-btn" aria-label="Limpar busca" (click)="clearSearch()">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:12px;height:12px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="select-wrap" style="width: auto">
+              <select class="select" style="width: auto" [value]="typeValue()" (change)="onTypeChange($any($event.target).value)">
+                <option value="">Todos os tipos</option>
+                @for (opt of typeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+
+            <input
+              type="date"
+              class="input"
+              style="width: 150px"
+              [value]="dateFrom()"
+              (change)="onDateFromChange($any($event.target).value)"
+            />
+            <input
+              type="date"
+              class="input"
+              style="width: 150px"
+              [value]="dateTo()"
+              (change)="onDateToChange($any($event.target).value)"
+            />
+          </div>
+          <div class="right">
+            @if (store.hasActiveFilters()) {
+              <button type="button" class="btn ghost sm" (click)="resetFilters()">Limpar filtros</button>
             }
-          </select>
+          </div>
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-[12px] font-medium text-muted leading-none">Data início</label>
-          <input
-            type="date"
-            class="h-9 rounded-[5px] border border-border bg-surface px-3 text-[13px] text-text outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
-            (change)="onDateFromChange($event)"
-          />
-        </div>
+        <app-data-table
+          [rows]="store.operations()"
+          [columns]="columns()"
+          [loading]="store.loading()"
+          [emptyTemplate]="emptyTpl"
+          [noBorder]="true"
+        />
 
-        <div class="flex flex-col gap-1">
-          <label class="text-[12px] font-medium text-muted leading-none">Data fim</label>
-          <input
-            type="date"
-            class="h-9 rounded-[5px] border border-border bg-surface px-3 text-[13px] text-text outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
-            (change)="onDateToChange($event)"
-          />
-        </div>
+        @if (!store.loading() && store.total() > 0) {
+          <div class="pagination">
+            <span [innerHTML]="rangeText()"></span>
+            <div class="controls">
+              <button
+                type="button"
+                class="btn icon"
+                [disabled]="store.filters().page <= 1"
+                (click)="onPageChange(store.filters().page - 1)"
+                aria-label="Página anterior"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <span style="font-size:12.5px;color:var(--text-muted);min-width:52px;text-align:center">
+                {{ store.filters().page }} / {{ totalPages() }}
+              </span>
+              <button
+                type="button"
+                class="btn icon"
+                [disabled]="store.filters().page >= totalPages()"
+                (click)="onPageChange(store.filters().page + 1)"
+                aria-label="Próxima página"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+
       </div>
-
-      <!-- Table -->
-      <app-data-table
-        [rows]="store.operations()"
-        [columns]="columns()"
-        [loading]="store.loading()"
-        [emptyTemplate]="emptyTpl"
-      />
-
-      <!-- Pagination -->
-      <app-pagination
-        [total]="store.total()"
-        [page]="store.filters().page"
-        [pageSize]="store.filters().page_size"
-        (pageChange)="onPageChange($event)"
-      />
-
     </div>
 
-    <!-- Cell Templates -->
+    <!-- Cell templates -->
     <ng-template #dateCellTemplate let-op>
-      <span class="text-[12.5px] tabular-nums text-muted">{{ formatDate(op.created_at) }}</span>
+      <div style="font-size:12.5px">{{ formatDateTime(op.created_at) }}</div>
+      <div style="font-size:11.5px;color:var(--text-subtle)">{{ formatRelative(op.created_at) }}</div>
     </ng-template>
 
     <ng-template #plateCellTemplate let-op>
-      <span class="font-mono text-[12.5px] font-[550] tracking-wide text-text">
-        {{ op.vehicle_plate | plateFormat }}
-      </span>
+      <span class="plate">{{ op.vehicle_plate | plateFormat }}</span>
     </ng-template>
 
     <ng-template #badgeCellTemplate let-op>
-      <app-badge
-        [label]="getBadgeLabel(op.type)"
-        [variant]="getBadgeVariant(op.type)"
-        size="sm"
-      />
+      <app-badge [label]="opLabel(op.type)" [variant]="opVariant(op.type)" />
     </ng-template>
 
-    <!-- Empty State -->
-    <ng-template #emptyTpl>
-      @if (store.hasActiveFilters()) {
-        <div class="flex flex-col items-center gap-1">
-          <span class="text-[13px] font-medium text-text">Nenhuma operação encontrada</span>
-          <span class="text-[12px] text-muted">Tente ajustar ou limpar os filtros aplicados</span>
-        </div>
+    <ng-template #notesCellTemplate let-op>
+      @if (op.notes) {
+        <span style="font-size:12.5px">{{ op.notes }}</span>
       } @else {
-        <div class="flex flex-col items-center gap-1">
-          <span class="text-[13px] font-medium text-text">Nenhuma operação registrada</span>
-          <span class="text-[12px] text-muted">As operações da frota aparecerão aqui</span>
-        </div>
+        <span style="font-size:12.5px;color:var(--text-subtle)">—</span>
       }
+    </ng-template>
+
+    <ng-template #odometerCellTemplate let-op>
+      @if (op.odometer_km != null) {
+        <span class="mono text-sm">{{ op.odometer_km.toLocaleString('pt-BR') }} km</span>
+      } @else {
+        <span style="font-size:12.5px;color:var(--text-subtle)">—</span>
+      }
+    </ng-template>
+
+    <ng-template #returnDateCellTemplate let-op>
+      @if (op.expected_return_date) {
+        <span style="font-size:12.5px">{{ formatDate(op.expected_return_date) }}</span>
+      } @else {
+        <span style="font-size:12.5px;color:var(--text-subtle)">—</span>
+      }
+    </ng-template>
+
+    <ng-template #responsibleCellTemplate let-op>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="avatar" style="width:18px;height:18px;font-size:9px;flex-shrink:0">
+          {{ (op.performed_by || '?')[0].toUpperCase() }}
+        </div>
+        <span style="font-size:12.5px">{{ op.performed_by }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #emptyTpl>
+      <div class="empty">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <div class="title">
+          {{ store.hasActiveFilters() ? 'Nenhuma operação encontrada' : 'Nenhuma operação registrada' }}
+        </div>
+        <p class="desc">
+          {{ store.hasActiveFilters() ? 'Ajuste os filtros para ver outros resultados.' : 'Operações sobre veículos aparecerão aqui.' }}
+        </p>
+        @if (store.hasActiveFilters()) {
+          <button type="button" class="btn secondary" (click)="resetFilters()">Limpar filtros</button>
+        }
+      </div>
     </ng-template>
   `,
 })
-export class HistoryListComponent implements OnInit, OnDestroy {
+export class HistoryListComponent implements OnInit, AfterViewInit {
   protected readonly store = inject(HistoryStore)
+  private readonly destroyRef = inject(DestroyRef)
 
-  @ViewChild('dateCellTemplate', { static: true }) private dateCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
-  @ViewChild('plateCellTemplate', { static: true }) private plateCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
-  @ViewChild('badgeCellTemplate', { static: true }) private badgeCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('dateCellTemplate',        { static: true }) private dateCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('plateCellTemplate',       { static: true }) private plateCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('badgeCellTemplate',       { static: true }) private badgeCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('notesCellTemplate',       { static: true }) private notesCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('odometerCellTemplate',    { static: true }) private odometerCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('returnDateCellTemplate',  { static: true }) private returnDateCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
+  @ViewChild('responsibleCellTemplate', { static: true }) private responsibleCellTemplate!: TemplateRef<{ $implicit: VehicleOperation }>
 
-  protected readonly operationTypeOptions: { value: OperationType | ''; label: string }[] = [
-    { value: '', label: 'Todos os tipos' },
-    { value: 'check_in', label: 'Entrada' },
-    { value: 'check_out', label: 'Saída' },
-    { value: 'maintenance', label: 'Manutenção' },
+  protected readonly searchValue = signal('')
+  protected readonly typeValue   = signal('')
+  protected readonly dateFrom    = signal('')
+  protected readonly dateTo      = signal('')
+
+  private readonly searchSubject$ = new Subject<string>()
+
+  protected readonly columns = signal<TableColumn<VehicleOperation>[]>([])
+
+  protected readonly typeOptions: { value: OperationType; label: string }[] = [
+    { value: 'check_in',     label: 'Entrada' },
+    { value: 'check_out',    label: 'Saída' },
+    { value: 'maintenance',  label: 'Manutenção' },
     { value: 'deactivation', label: 'Desativação' },
     { value: 'reactivation', label: 'Reativação' },
-    { value: 'status_change', label: 'Alteração' },
   ]
 
-  readonly columns = computed<TableColumn<VehicleOperation>[]>(() => [
-    { key: 'created_at', label: 'Data/Hora', cellTemplate: this.dateCellTemplate, width: '180px' },
-    { key: 'vehicle_plate', label: 'Veículo', cellTemplate: this.plateCellTemplate, width: '120px' },
-    { key: 'type', label: 'Operação', cellTemplate: this.badgeCellTemplate, width: '140px' },
-    { key: 'odometer_km', label: 'KM', render: (op) => op.odometer_km != null ? `${op.odometer_km.toLocaleString('pt-BR')} km` : '—', width: '100px' },
-    { key: 'notes', label: 'Notas', render: (op) => op.notes ?? '—' },
-    { key: 'performed_by', label: 'Responsável', width: '130px' },
-  ])
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.store.total() / this.store.filters().page_size))
+  )
 
-  private searchDebounce: ReturnType<typeof setTimeout> | null = null
+  protected readonly rangeText = computed(() => {
+    const { page, page_size } = this.store.filters()
+    const total = this.store.total()
+    if (total === 0) return ''
+    const start = (page - 1) * page_size + 1
+    const end   = Math.min(page * page_size, total)
+    return `Exibindo <strong style="font-weight:600;color:var(--text)">${start}–${end}</strong> de <strong style="font-weight:600;color:var(--text)">${total}</strong>`
+  })
+
+  protected readonly opLabel   = (t: OperationType) => operationLabel(t)
+  protected readonly opVariant = (t: OperationType) => operationBadgeVariant(t)
 
   ngOnInit(): void {
     this.store.loadOperations()
+    this.searchSubject$.pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(term => {
+      this.store.applyFilter({ vehicle_plate: term || undefined })
+    })
   }
 
-  ngOnDestroy(): void {
-    if (this.searchDebounce) clearTimeout(this.searchDebounce)
+  ngAfterViewInit(): void {
+    this.columns.set([
+      { key: 'created_at',           label: 'Data/Hora',  width: '170px', cellTemplate: this.dateCellTemplate },
+      { key: 'vehicle_plate',        label: 'Veículo',    width: '120px', cellTemplate: this.plateCellTemplate },
+      { key: 'type',                 label: 'Operação',   width: '140px', cellTemplate: this.badgeCellTemplate },
+      { key: 'notes',                label: 'Observações',                cellTemplate: this.notesCellTemplate },
+      { key: 'odometer_km',          label: 'Odômetro',   width: '110px', align: 'right', cellTemplate: this.odometerCellTemplate },
+      { key: 'expected_return_date', label: 'Devolução',  width: '130px', cellTemplate: this.returnDateCellTemplate },
+      { key: 'performed_by',         label: 'Responsável',width: '110px', cellTemplate: this.responsibleCellTemplate },
+    ])
   }
 
-  protected onSearchChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value
-    if (this.searchDebounce) clearTimeout(this.searchDebounce)
-    this.searchDebounce = setTimeout(() => {
-      this.store.applyFilter({ vehicle_plate: value || undefined })
-    }, 400)
+  protected onSearchInput(value: string): void {
+    this.searchValue.set(value)
+    this.searchSubject$.next(value)
   }
 
-  protected onTypeChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as OperationType | ''
-    this.store.applyFilter({ type: value || undefined })
+  protected clearSearch(): void {
+    this.searchValue.set('')
+    this.searchSubject$.next('')
   }
 
-  protected onDateFromChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value
+  protected onTypeChange(value: string): void {
+    this.typeValue.set(value)
+    this.store.applyFilter({ type: (value || undefined) as OperationType | undefined })
+  }
+
+  protected onDateFromChange(value: string): void {
+    this.dateFrom.set(value)
     this.store.applyFilter({ date_from: value || undefined })
   }
 
-  protected onDateToChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value
+  protected onDateToChange(value: string): void {
+    this.dateTo.set(value)
     this.store.applyFilter({ date_to: value || undefined })
   }
 
@@ -190,21 +299,35 @@ export class HistoryListComponent implements OnInit, OnDestroy {
     this.store.applyFilter({ page })
   }
 
-  protected formatDate(isoString: string): string {
-    return new Date(isoString).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  protected resetFilters(): void {
+    this.searchValue.set('')
+    this.typeValue.set('')
+    this.dateFrom.set('')
+    this.dateTo.set('')
+    this.store.applyFilter({ vehicle_plate: undefined, type: undefined, date_from: undefined, date_to: undefined })
+  }
+
+  protected formatDateTime(iso: string): string {
+    return new Date(iso).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     })
   }
 
-  protected getBadgeLabel(type: OperationType): string {
-    return operationLabel(type)
+  protected formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+    })
   }
 
-  protected getBadgeVariant(type: OperationType) {
-    return operationBadgeVariant(type)
+  protected formatRelative(iso: string): string {
+    const diff = Date.now() - new Date(iso).getTime()
+    const m = Math.floor(diff / 60000)
+    if (m < 1)  return 'agora'
+    if (m < 60) return `há ${m}min`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `há ${h}h`
+    const d = Math.floor(h / 24)
+    return `há ${d}d`
   }
 }

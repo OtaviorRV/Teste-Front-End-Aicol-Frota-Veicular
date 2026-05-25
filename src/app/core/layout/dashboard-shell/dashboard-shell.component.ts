@@ -25,20 +25,20 @@ import { ToastHostComponent } from '../../toast/toast-host.component'
   template: `
     @if (isMobile() && sidebarOpen()) {
       <div
-        class="fixed inset-0 z-20 bg-overlay"
+        style="position:fixed;inset:0;z-index:20;background:var(--bg-overlay)"
         (click)="sidebarOpen.set(false)"
       ></div>
     }
 
-    <aside [class]="sidebarClass()" style="grid-area: sidebar">
+    <aside class="sidebar" [style]="isMobile() ? mobileSidebarStyle() : null">
       <app-sidebar />
     </aside>
 
-    <header class="bg-surface-raised border-b border-border flex items-center justify-between px-4" style="grid-area: topbar">
+    <header class="topbar">
       <app-topbar (menuToggle)="toggleSidebar()" />
     </header>
 
-    <main class="overflow-auto bg-surface-base" style="grid-area: main">
+    <main class="main">
       <router-outlet />
     </main>
 
@@ -67,11 +67,8 @@ export class DashboardShellComponent {
     this.sidebarOpen.update(v => !v)
   }
 
-  protected sidebarClass(): string {
-    if (!this.isMobile()) {
-      return 'bg-surface-raised border-r border-border flex flex-col'
-    }
-    const base = 'fixed inset-y-0 left-0 z-30 w-64 bg-surface-raised border-r border-border flex flex-col transition-transform duration-200'
-    return base + (this.sidebarOpen() ? ' translate-x-0' : ' -translate-x-full')
+  protected mobileSidebarStyle(): string {
+    const base = 'position:fixed;inset-block:0;left:0;z-index:30;width:232px;transition:transform 0.2s'
+    return base + (this.sidebarOpen() ? '' : ';transform:translateX(-100%)')
   }
 }

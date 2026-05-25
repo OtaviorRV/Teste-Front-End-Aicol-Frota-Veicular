@@ -1,87 +1,14 @@
-@import "tailwindcss";
 @import "./styles/tokens.css";
 
-@theme {
-  /* Surface */
-  --color-surface-base: var(--bg-base);
-  --color-surface-raised: var(--bg-raised);
-  --color-surface-elevated: var(--bg-elevated);
-  --color-surface-sunken: var(--bg-sunken);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-border-focus: var(--border-focus);
-
-  /* Text */
-  --color-text: var(--text);
-  --color-muted: var(--text-muted);
-  --color-subtle: var(--text-subtle);
-  --color-on-accent: var(--text-on-accent);
-
-  /* Brand */
-  --color-brand-500: var(--accent);
-  --color-brand-400: var(--accent-hover);
-  --color-brand-600: var(--accent-active);
-  --color-brand-soft: var(--accent-soft);
-  --color-brand-soft-text: var(--accent-soft-text);
-
-  /* Semantic */
-  --color-success: var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-success-text: var(--success-text);
-  --color-warning: var(--warning);
-  --color-warning-soft: var(--warning-soft);
-  --color-warning-text: var(--warning-text);
-  --color-danger: var(--danger);
-  --color-danger-soft: var(--danger-soft);
-  --color-danger-text: var(--danger-text);
-  --color-info: var(--info);
-  --color-info-soft: var(--info-soft);
-  --color-info-text: var(--info-text);
-  --color-neutral-soft: var(--neutral-soft);
-  --color-neutral-text: var(--neutral-text);
-
-  /* HTTP methods */
-  --color-method-get: var(--method-get);
-  --color-method-post: var(--method-post);
-  --color-method-patch: var(--method-patch);
-  --color-method-delete: var(--method-delete);
-
-  /* Typography */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+table.data tbody tr.row-selected td {
+  background: var(--accent-soft);
 }
 
-/* Skeleton shimmer */
-@keyframes shimmer {
-  0%   { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+.mobile-only {
+  display: none !important;
 }
-
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-sunken) 50%, var(--bg-elevated) 100%);
-  background-size: 200px 100%;
-  border-radius: 4px;
-  animation: shimmer 1.4s infinite linear;
-}
-
-/* CDK Dialog — backdrop */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)   scale(1);    }
-}
-
-.dlg-backdrop {
-  background: var(--bg-overlay);
-  animation: fadeIn 0.13s ease-out forwards;
-}
-
-.dlg-panel {
-  animation: slideUp 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@media (max-width: 767px) {
+  .mobile-only { display: inline-flex !important; }
 }
 
 .plate {

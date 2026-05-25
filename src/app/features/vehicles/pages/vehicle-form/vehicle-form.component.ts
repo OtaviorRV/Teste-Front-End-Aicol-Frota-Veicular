@@ -26,14 +26,10 @@ import { AuthStore } from '../../../../core/auth/auth.store'
 import { ToastService } from '../../../../core/toast/toast.service'
 import { Vehicle } from '../../models/vehicle.model'
 import { CreateVehicleDto, UpdateVehicleDto } from '../../models/vehicle-dto.models'
-import { vehicleStatusLabel, vehicleStatusVariant } from '../../utils/vehicle.utils'
+import { formatKm, vehicleStatusLabel, vehicleStatusVariant } from '../../utils/vehicle.utils'
 import { uniqueFieldValidator } from '../../validators/unique-field.validator'
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard'
-import { InputFieldComponent } from '../../../../shared/components/atoms/input-field/input-field.component'
-import { SelectFieldComponent } from '../../../../shared/components/atoms/select-field/select-field.component'
-import { ButtonComponent } from '../../../../shared/components/atoms/button/button.component'
 import { BadgeComponent } from '../../../../shared/components/atoms/badge/badge.component'
-import { SelectOption } from '../../../../shared/components/atoms/select-field/select-option.model'
 
 interface VehicleForm {
   license_plate: FormControl<string>
@@ -48,142 +44,259 @@ interface VehicleForm {
   selector: 'app-vehicle-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ReactiveFormsModule,
-    InputFieldComponent,
-    SelectFieldComponent,
-    ButtonComponent,
-    BadgeComponent,
-  ],
+  imports: [ReactiveFormsModule, BadgeComponent],
   template: `
-    <div class="flex flex-col h-full">
+    <div class="page narrow">
 
-      <div class="flex items-center gap-3 px-6 py-5 border-b border-border">
-        <button
-          type="button"
-          (click)="goBack()"
-          class="inline-flex h-[30px] items-center gap-1 px-2 text-[12.5px] text-muted hover:text-text transition-colors rounded-[5px] hover:bg-surface-elevated cursor-pointer"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-          </svg>
-          Voltar
-        </button>
-        <div class="h-4 w-px bg-border"></div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-[17px] font-semibold text-text">{{ pageTitle() }}</h1>
-          @if (isEdit() && editVehicle()) {
-            <app-badge
-              [label]="vehicleStatusLabel(editVehicle()!.status)"
-              [variant]="vehicleStatusVariant(editVehicle()!.status)"
-              [dot]="true"
-            />
-          }
+      <div class="page-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <button
+              type="button"
+              class="btn ghost sm"
+              style="gap:4px"
+              (click)="goBack()"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" style="width:12px;height:12px" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+              </svg>
+              Voltar
+            </button>
+            <h1 class="page-title">{{ pageTitle() }}</h1>
+            @if (isEdit() && editVehicle()) {
+              <app-badge
+                [label]="vehicleStatusLabel(editVehicle()!.status)"
+                [variant]="vehicleStatusVariant(editVehicle()!.status)"
+                [dot]="true"
+              />
+            }
+          </div>
+          <p class="page-subtitle">{{ pageSubtitle() }}</p>
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto px-6 py-6">
+      @if (loading()) {
+        <div class="card">
+          <div class="form-section">
+            <div class="form-grid">
+              @for (i of skeletonRows; track i) {
+                <div class="field">
+                  <div class="skeleton" style="height:12px;width:80px;margin-bottom:2px"></div>
+                  <div class="skeleton" style="height:32px;width:100%"></div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="card">
 
-        @if (loading()) {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-            @for (i of skeletonRows; track i) {
-              <div class="flex flex-col gap-1">
-                <div class="h-[13px] w-20 animate-pulse rounded bg-surface-elevated"></div>
-                <div class="h-[32px] w-full animate-pulse rounded-[5px] bg-surface-elevated"></div>
+          @if (!hasBrands()) {
+            <div class="form-section">
+              <div class="alert warning" style="gap:10px">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;flex-shrink:0;margin-top:1px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div>
+                  <div style="font-weight:600;margin-bottom:4px">Nenhuma marca cadastrada</div>
+                  <div>Cadastre pelo menos uma marca e um modelo antes de registrar um veículo.</div>
+                  <button type="button" class="btn primary sm" style="margin-top:8px" (click)="navigateToBrands()">
+                    Ir para Catálogo
+                  </button>
+                </div>
               </div>
-            }
-          </div>
-        } @else if (!hasBrands()) {
-          <div class="flex flex-col items-center justify-center py-16 gap-3 text-center max-w-sm mx-auto">
-            <p class="text-[14px] text-muted">
-              Nenhuma marca cadastrada. Adicione marcas antes de cadastrar veículos.
-            </p>
-            <app-button (clicked)="navigateToBrands()">Ir para Catálogo de Marcas</app-button>
-          </div>
-        } @else {
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="max-w-2xl">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+          }
 
-              <app-input-field
-                label="Placa"
-                placeholder="ABC-1234"
-                formControlName="license_plate"
-                [error]="fieldError('license_plate')"
-                [required]="true"
-                [pending]="isPending('license_plate')"
-              />
+          <!-- Dados regulatórios -->
+          <div class="form-section">
+            <h3>Dados regulatórios</h3>
+            <p class="section-desc">Campos obrigatórios para vinculação ao DETRAN.</p>
+            <div class="form-grid">
 
-              <app-input-field
-                label="Ano"
-                type="number"
-                placeholder="{{ currentYear }}"
-                formControlName="year"
-                [error]="fieldError('year')"
-                [required]="true"
-              />
-
-              <app-input-field
-                label="Chassi"
-                placeholder="9BWZZZ377VT004251"
-                formControlName="chassis"
-                [error]="fieldError('chassis')"
-                [required]="true"
-                [pending]="isPending('chassis')"
-              />
-
-              <app-input-field
-                label="RENAVAM"
-                placeholder="00123456789"
-                formControlName="renavam"
-                [error]="fieldError('renavam')"
-                [required]="true"
-                [pending]="isPending('renavam')"
-              />
-
-              <app-select-field
-                label="Marca"
-                placeholder="Selecione a marca..."
-                formControlName="brand_id"
-                [options]="brandOptions()"
-                [error]="fieldError('brand_id')"
-                [required]="true"
-              />
-
-              <div class="flex flex-col gap-1">
-                <app-select-field
-                  label="Modelo"
-                  placeholder="Selecione o modelo..."
-                  formControlName="model_id"
-                  [options]="modelOptions()"
-                  [error]="fieldError('model_id')"
-                  [required]="true"
+              <div class="field">
+                <label class="field-label">Placa <span class="req">*</span></label>
+                <input
+                  type="text"
+                  formControlName="license_plate"
+                  class="input mono"
+                  [class.has-error]="!!fieldError('license_plate')"
+                  placeholder="ABC1A23"
+                  maxlength="8"
+                  style="text-transform:uppercase"
                 />
-                @if (noModelsForBrand()) {
-                  <p class="text-[11.5px] text-warning-text mt-0.5">
-                    Nenhum modelo cadastrado para esta marca.
-                    <button type="button" (click)="navigateToModels()" class="underline cursor-pointer">Cadastrar modelo</button>
-                  </p>
+                @if (isPending('license_plate')) {
+                  <div class="field-help">Verificando disponibilidade…</div>
+                } @else if (fieldError('license_plate')) {
+                  <div class="field-error">{{ fieldError('license_plate') }}</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">
+                  Ano <span class="req">*</span>
+                  @if (isEdit()) { <span style="font-weight:400;color:var(--text-subtle)">(imutável)</span> }
+                </label>
+                <input
+                  type="number"
+                  formControlName="year"
+                  class="input"
+                  [class.has-error]="!!fieldError('year')"
+                  [placeholder]="currentYear.toString()"
+                  [min]="1950"
+                  [max]="currentYear + 1"
+                />
+                @if (fieldError('year')) {
+                  <div class="field-error">{{ fieldError('year') }}</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">
+                  Chassi <span class="req">*</span>
+                  @if (isEdit()) {
+                    <span style="font-weight:400;color:var(--text-subtle)">(imutável)</span>
+                  } @else {
+                    <span style="font-weight:400;color:var(--text-subtle)">17 caracteres alfanuméricos</span>
+                  }
+                </label>
+                <input
+                  type="text"
+                  formControlName="chassis"
+                  class="input mono"
+                  [class.has-error]="!!fieldError('chassis')"
+                  placeholder="9BWZZZ377VT004251"
+                  maxlength="17"
+                  style="text-transform:uppercase"
+                />
+                @if (isPending('chassis')) {
+                  <div class="field-help">Verificando disponibilidade…</div>
+                } @else if (fieldError('chassis')) {
+                  <div class="field-error">{{ fieldError('chassis') }}</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">
+                  RENAVAM <span class="req">*</span>
+                  @if (isEdit()) {
+                    <span style="font-weight:400;color:var(--text-subtle)">(imutável)</span>
+                  } @else {
+                    <span style="font-weight:400;color:var(--text-subtle)">9–11 dígitos</span>
+                  }
+                </label>
+                <input
+                  type="text"
+                  formControlName="renavam"
+                  class="input mono"
+                  [class.has-error]="!!fieldError('renavam')"
+                  placeholder="01298374561"
+                  maxlength="11"
+                  inputmode="numeric"
+                />
+                @if (isPending('renavam')) {
+                  <div class="field-help">Verificando disponibilidade…</div>
+                } @else if (fieldError('renavam')) {
+                  <div class="field-error">{{ fieldError('renavam') }}</div>
                 }
               </div>
 
             </div>
+          </div>
 
-            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-border">
-              <app-button
-                type="submit"
-                variant="primary"
-                [loading]="saving()"
-                [disabled]="submitted() && !canSubmit()"
-              >
-                {{ isEdit() ? 'Salvar alterações' : 'Cadastrar veículo' }}
-              </app-button>
-              <app-button type="button" (clicked)="goBack()">Cancelar</app-button>
+          <!-- Classificação -->
+          <div class="form-section">
+            <h3>Classificação</h3>
+            <p class="section-desc">Marca → modelo (filtrado pela marca selecionada).</p>
+            <div class="form-grid">
+
+              <div class="field">
+                <label class="field-label">Marca <span class="req">*</span></label>
+                <div class="select-wrap">
+                  <select
+                    formControlName="brand_id"
+                    class="select"
+                    [class.has-error]="!!fieldError('brand_id')"
+                  >
+                    <option value="">Selecione uma marca</option>
+                    @for (b of catalogStore.brands(); track b.id) {
+                      <option [value]="b.id">{{ b.name }}</option>
+                    }
+                  </select>
+                </div>
+                @if (fieldError('brand_id')) {
+                  <div class="field-error">{{ fieldError('brand_id') }}</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">Modelo <span class="req">*</span></label>
+                <div class="select-wrap">
+                  <select
+                    formControlName="model_id"
+                    class="select"
+                    [class.has-error]="!!fieldError('model_id')"
+                  >
+                    <option value="">{{ !selectedBrandId() ? 'Selecione uma marca primeiro' : 'Selecione um modelo' }}</option>
+                    @for (m of availableModels(); track m.id) {
+                      <option [value]="m.id">{{ m.name }}</option>
+                    }
+                  </select>
+                </div>
+                @if (noModelsForBrand()) {
+                  <div class="field-help" style="color:var(--warning-text)">
+                    Nenhum modelo para esta marca.
+                    <button type="button" style="text-decoration:underline;cursor:pointer" (click)="navigateToModels()">Cadastrar modelo</button>
+                  </div>
+                } @else if (fieldError('model_id')) {
+                  <div class="field-error">{{ fieldError('model_id') }}</div>
+                }
+              </div>
+
             </div>
+          </div>
 
-          </form>
-        }
+          <!-- Metadados (somente edição) -->
+          @if (isEdit() && editVehicle()) {
+            <div class="form-section">
+              <h3>Metadados</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label class="field-label">Cadastrado em</label>
+                  <input class="input" [value]="formatCreatedAt(editVehicle()!.created_at)" disabled />
+                </div>
+                <div class="field">
+                  <label class="field-label">Cadastrado por</label>
+                  <input class="input" [value]="editVehicle()!.created_by" disabled />
+                </div>
+                <div class="field">
+                  <label class="field-label">Operações registradas</label>
+                  <input class="input" [value]="editVehicle()!.operation_count ?? 0" disabled />
+                </div>
+                <div class="field">
+                  <label class="field-label">Último odômetro</label>
+                  <input class="input mono" [value]="formatKm(editVehicle()!.last_odometer_km)" disabled />
+                </div>
+              </div>
+            </div>
+          }
 
-      </div>
+          <div class="form-actions">
+            <button type="button" class="btn ghost" (click)="goBack()">Cancelar</button>
+            <button
+              type="submit"
+              class="btn primary"
+              [disabled]="saving() || noBrands() || (submitted() && !canSubmit())"
+            >
+              @if (saving()) { <span class="spinner" aria-hidden="true"></span> }
+              {{ isEdit() ? 'Salvar alterações' : 'Cadastrar veículo' }}
+            </button>
+          </div>
+
+        </form>
+      }
+
     </div>
   `,
 })
@@ -212,13 +325,21 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
   private readonly formPending = signal(false)
 
   protected readonly isEdit = computed(() => this.mode() === 'edit')
-  protected readonly pageTitle = computed(() => this.isEdit() ? 'Editar Veículo' : 'Novo Veículo')
+  protected readonly pageTitle = computed(() =>
+    this.isEdit() ? 'Editar Veículo' : 'Novo Veículo'
+  )
+  protected readonly pageSubtitle = computed(() =>
+    this.isEdit()
+      ? 'Chassi, RENAVAM e ano são campos regulatórios imutáveis.'
+      : 'Preencha os dados regulatórios e classificação. O status inicial será Disponível.'
+  )
 
   protected readonly canSubmit = computed(() =>
     this.formValid() && !this.formPending() && !this.saving()
   )
 
-  protected readonly hasBrands = computed(() => this.catalogStore.brands().length > 0)
+  protected readonly hasBrands  = computed(() => this.catalogStore.brands().length > 0)
+  protected readonly noBrands   = computed(() => this.catalogStore.brands().length === 0)
 
   protected readonly availableModels = computed(() =>
     this.catalogStore.models().filter(m => m.brand_id === this.selectedBrandId())
@@ -228,19 +349,12 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
     !!this.selectedBrandId() && this.availableModels().length === 0
   )
 
-  protected readonly brandOptions = computed<SelectOption[]>(() =>
-    this.catalogStore.brands().map(b => ({ value: b.id, label: b.name }))
-  )
-
-  protected readonly modelOptions = computed<SelectOption[]>(() =>
-    this.availableModels().map(m => ({ value: m.id, label: m.name }))
-  )
-
   protected readonly currentYear = new Date().getFullYear()
   protected readonly skeletonRows = [1, 2, 3, 4, 5, 6]
 
-  protected readonly vehicleStatusLabel = vehicleStatusLabel
+  protected readonly vehicleStatusLabel   = vehicleStatusLabel
   protected readonly vehicleStatusVariant = vehicleStatusVariant
+  protected readonly formatKm             = formatKm
 
   private readonly errorMessages: Readonly<Record<string, Record<string, string>>> = {
     license_plate: {
@@ -470,5 +584,12 @@ export class VehicleFormComponent implements OnInit, HasUnsavedChanges {
 
   protected isPending(field: 'license_plate' | 'chassis' | 'renavam'): boolean {
     return this.form?.get(field)?.status === 'PENDING'
+  }
+
+  protected formatCreatedAt(iso: string): string {
+    return new Date(iso).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
   }
 }
