@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, delay, map, of } from 'rxjs'
+import { Observable, delay, map, of, switchMap, tap } from 'rxjs'
 import { environment } from '../../../../environments/environment'
+import { VehicleApiService } from '../../vehicles/services/vehicle-api.service'
 import {
   CreateOperationDto,
   OperationType,
@@ -13,13 +14,24 @@ import {
 @Injectable({ providedIn: 'root' })
 export class HistoryApiService {
   private readonly http = inject(HttpClient)
+  private readonly vehicleApi = inject(VehicleApiService)
   private readonly baseUrl = `${environment.apiUrl}/operations`
+
+  private mockCache: VehicleOperation[] | null = null
+
+  private ensureLoaded(): Observable<VehicleOperation[]> {
+    if (this.mockCache !== null) return of(this.mockCache)
+    return this.http.get<VehicleOperation[]>('/assets/mocks/seed_operations.json').pipe(
+      tap(data => this.mockCache = [...data]),
+      map(() => this.mockCache!)
+    )
+  }
 
   getAll(filters?: VehicleOperationFilters): Observable<PaginatedOperationResponse> {
     if (environment.useMock) {
-      return this.http
-        .get<VehicleOperation[]>('/assets/mocks/seed_operations.json')
-        .pipe(map(data => this.applyMockFilters(data, filters)))
+      return this.ensureLoaded().pipe(
+        map(data => this.applyMockFilters(data, filters))
+      )
     }
 
     const params = Object.fromEntries(
@@ -32,14 +44,26 @@ export class HistoryApiService {
 
   create(dto: CreateOperationDto): Observable<VehicleOperation> {
     if (environment.useMock) {
-      const mock: VehicleOperation = {
-        ...dto,
-        id: crypto.randomUUID(),
-        vehicle_plate: 'XXX0000',
-        performed_by: dto.created_by,
-        created_at: new Date().toISOString(),
-      }
-      return of(mock).pipe(delay(400))
+      return this.vehicleApi.getById(dto.vehicle_id).pipe(
+        switchMap(vehicle => this.ensureLoaded().pipe(
+          map(() => {
+            const op: VehicleOperation = {
+              id: crypto.randomUUID(),
+              vehicle_id: dto.vehicle_id,
+              vehicle_plate: vehicle.license_plate,
+              type: dto.type,
+              notes: dto.notes,
+              odometer_km: dto.odometer_km,
+              expected_return_date: dto.expected_return_date,
+              performed_by: dto.created_by,
+              created_at: new Date().toISOString(),
+            }
+            this.mockCache = [op, ...this.mockCache!]
+            return op
+          })
+        )),
+        delay(400)
+      )
     }
     return this.http.post<VehicleOperation>(this.baseUrl, dto)
   }

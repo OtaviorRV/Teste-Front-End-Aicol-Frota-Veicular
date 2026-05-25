@@ -423,6 +423,8 @@ a:hover {
 /* === Table === */
 .table-wrap {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 360px);
 }
 table.data {
   width: 100%;

@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
-import { Observable, map, of, switchMap } from 'rxjs'
+import { Observable, map, of, tap } from 'rxjs'
 import { environment } from '../../../../environments/environment'
 import { PaginatedResponse } from '../../../shared/models/api.models'
 import { Vehicle, VehicleFilters } from '../models/vehicle.model'
@@ -11,9 +11,19 @@ export class VehicleApiService {
   private readonly http = inject(HttpClient)
   private readonly base = `${environment.apiUrl}/vehicles`
 
+  private mockCache: Vehicle[] | null = null
+
+  private ensureLoaded(): Observable<Vehicle[]> {
+    if (this.mockCache !== null) return of(this.mockCache)
+    return this.http.get<Vehicle[]>('/assets/mocks/seed_vehicles.json').pipe(
+      tap(data => this.mockCache = [...data]),
+      map(() => this.mockCache!)
+    )
+  }
+
   getAll(filters: VehicleFilters): Observable<PaginatedResponse<Vehicle>> {
     if (environment.useMock) {
-      return this.http.get<Vehicle[]>('/assets/mocks/seed_vehicles.json').pipe(
+      return this.ensureLoaded().pipe(
         map(all => this.applyMockFilters(all, filters))
       )
     }
@@ -23,7 +33,7 @@ export class VehicleApiService {
 
   getById(id: string): Observable<Vehicle> {
     if (environment.useMock) {
-      return this.http.get<Vehicle[]>('/assets/mocks/seed_vehicles.json').pipe(
+      return this.ensureLoaded().pipe(
         map(all => {
           const found = all.find(v => v.id === id)
           if (!found) throw new Error(`Vehicle ${id} not found`)
@@ -36,26 +46,37 @@ export class VehicleApiService {
 
   create(dto: CreateVehicleDto): Observable<Vehicle> {
     if (environment.useMock) {
-      const created: Vehicle = {
-        id: `veh-${Date.now()}`,
-        license_plate: dto.license_plate,
-        chassis: dto.chassis,
-        renavam: dto.renavam,
-        year: dto.year,
-        model_id: dto.model_id,
-        status: 'disponivel',
-        created_at: new Date().toISOString(),
-        created_by: dto.created_by,
-      }
-      return of(created)
+      return this.ensureLoaded().pipe(
+        map(() => {
+          const created: Vehicle = {
+            id: `veh-${Date.now()}`,
+            license_plate: dto.license_plate,
+            chassis: dto.chassis,
+            renavam: dto.renavam,
+            year: dto.year,
+            model_id: dto.model_id,
+            status: 'disponivel',
+            created_at: new Date().toISOString(),
+            created_by: dto.created_by,
+          }
+          this.mockCache = [created, ...this.mockCache!]
+          return created
+        })
+      )
     }
     return this.http.post<Vehicle>(this.base, dto)
   }
 
   update(id: string, dto: UpdateVehicleDto): Observable<Vehicle> {
     if (environment.useMock) {
-      return this.getById(id).pipe(
-        map(existing => ({ ...existing, ...dto }))
+      return this.ensureLoaded().pipe(
+        map(() => {
+          const idx = this.mockCache!.findIndex(v => v.id === id)
+          if (idx === -1) throw new Error(`Vehicle ${id} not found`)
+          const updated = { ...this.mockCache![idx], ...dto }
+          this.mockCache![idx] = updated
+          return updated
+        })
       )
     }
     return this.http.patch<Vehicle>(`${this.base}/${id}`, dto)
@@ -63,14 +84,18 @@ export class VehicleApiService {
 
   remove(id: string): Observable<void> {
     if (environment.useMock) {
-      return of(undefined)
+      return this.ensureLoaded().pipe(
+        map(() => {
+          this.mockCache = this.mockCache!.filter(v => v.id !== id)
+        })
+      )
     }
     return this.http.delete<void>(`${this.base}/${id}`)
   }
 
   checkFieldExists(field: 'license_plate' | 'chassis' | 'renavam', value: string, excludeId?: string): Observable<boolean> {
     if (environment.useMock) {
-      return this.http.get<Vehicle[]>('/assets/mocks/seed_vehicles.json').pipe(
+      return this.ensureLoaded().pipe(
         map(all => all.some(v => v[field] === value && v.id !== excludeId))
       )
     }
@@ -82,7 +107,7 @@ export class VehicleApiService {
 
   countByModel(modelId: string): Observable<number> {
     if (environment.useMock) {
-      return this.http.get<Vehicle[]>('/assets/mocks/seed_vehicles.json').pipe(
+      return this.ensureLoaded().pipe(
         map(all => all.filter(v => v.model_id === modelId).length)
       )
     }
