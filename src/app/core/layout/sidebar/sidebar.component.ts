@@ -54,7 +54,10 @@ interface NavItem {
                 [routerLink]="child.route"
                 [attr.aria-current]="isActive(child.route) ? 'page' : null"
                 [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
-              >{{ child.label }}</a>
+              >
+                <span [innerHTML]="icons[child.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+                <span>{{ child.label }}</span>
+              </a>
             }
           }
         }
@@ -87,7 +90,10 @@ interface NavItem {
                 [routerLink]="child.route"
                 [attr.aria-current]="isActive(child.route) ? 'page' : null"
                 [class]="'sidebar-nav-item child' + (isActive(child.route) ? ' active' : '')"
-              >{{ child.label }}</a>
+              >
+                <span [innerHTML]="icons[child.icon]" class="sidebar-nav-icon" aria-hidden="true"></span>
+                <span>{{ child.label }}</span>
+              </a>
             }
           }
         }
@@ -149,14 +155,8 @@ export class SidebarComponent {
   ]
 
   readonly configuracaoItems: NavItem[] = [
-    {
-      label: 'Catálogo', route: '/catalog', icon: 'folder',
-      children: [
-        { label: 'Marcas',  route: '/catalog/brands', icon: 'tag' },
-        { label: 'Modelos', route: '/catalog/models', icon: 'tag' },
-      ],
-    },
-    { label: 'Auditoria', route: '/audit', icon: 'search' },
+    { label: 'Catálogo', route: '/catalog', icon: 'folder' },
+    { label: 'Auditoria', route: '/audit',   icon: 'search' },
   ]
 
   isActive(route: string): boolean {

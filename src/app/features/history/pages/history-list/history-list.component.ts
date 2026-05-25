@@ -106,6 +106,18 @@ import { operationBadgeVariant, operationLabel } from '../../utils/operation.uti
           <div class="pagination">
             <span [innerHTML]="rangeText()"></span>
             <div class="controls">
+              <div class="select-wrap" style="width: auto">
+                <select
+                  class="select"
+                  style="width: auto; height: 26px; font-size: 12px; padding: 0 26px 0 8px"
+                  [value]="store.filters().page_size"
+                  (change)="onPageSizeChange(+$any($event.target).value)"
+                >
+                  <option value="10">10 / pág</option>
+                  <option value="20">20 / pág</option>
+                  <option value="50">50 / pág</option>
+                </select>
+              </div>
               <button
                 type="button"
                 class="btn icon"
@@ -297,6 +309,10 @@ export class HistoryListComponent implements OnInit, AfterViewInit {
 
   protected onPageChange(page: number): void {
     this.store.applyFilter({ page })
+  }
+
+  protected onPageSizeChange(size: number): void {
+    this.store.applyFilter({ page_size: size, page: 1 })
   }
 
   protected resetFilters(): void {

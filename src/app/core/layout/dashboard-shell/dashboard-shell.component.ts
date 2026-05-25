@@ -21,6 +21,13 @@ import { ToastHostComponent } from '../../toast/toast-host.component'
       grid-template-areas: "sidebar topbar" "sidebar main";
       height: 100vh;
     }
+    @media (max-width: 767px) {
+      :host {
+        grid-template-columns: 1fr;
+        grid-template-rows: 48px 1fr;
+        grid-template-areas: "topbar" "main";
+      }
+    }
   `],
   template: `
     @if (isMobile() && sidebarOpen()) {
