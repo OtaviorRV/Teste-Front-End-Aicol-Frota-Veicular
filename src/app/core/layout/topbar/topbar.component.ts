@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, output, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, effect, inject, output, signal } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router, RouterLink } from '@angular/router'
 import { filter, map } from 'rxjs/operators'
-import { AuthStore } from '../../auth/auth.store'
 
 interface Crumb {
   label: string
@@ -67,10 +66,8 @@ function buildCrumbs(url: string): Crumb[] {
 
       </div>
 
-      <!-- Right: theme toggle + avatar dropdown -->
+      <!-- Right: theme toggle -->
       <div class="flex items-center gap-1">
-
-        <!-- Theme toggle -->
         <button
           type="button"
           class="flex h-7 w-7 items-center justify-center rounded-[5px] text-muted transition-colors hover:bg-surface-elevated hover:text-text"
@@ -87,56 +84,14 @@ function buildCrumbs(url: string): Crumb[] {
             </svg>
           }
         </button>
-
-        <!-- Avatar dropdown -->
-        <div class="relative">
-          <button
-            type="button"
-            class="flex h-7 items-center gap-1.5 rounded-[5px] px-2 text-muted transition-colors hover:bg-surface-elevated hover:text-text"
-            (click)="toggleDropdown()"
-            [attr.aria-expanded]="dropdownOpen()"
-            aria-haspopup="menu"
-          >
-            <div class="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-brand-soft text-[10px] font-semibold text-brand-soft-text">
-              {{ initials() }}
-            </div>
-            <span class="hidden text-[12.5px] font-medium md:block">{{ user()?.nickname }}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-
-          @if (dropdownOpen()) {
-            <div
-              class="absolute right-0 top-full z-50 mt-1 w-40 rounded-[6px] border border-border bg-surface-raised py-1 shadow-md"
-              role="menu"
-            >
-              <button
-                type="button"
-                class="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-muted transition-colors hover:bg-surface-elevated hover:text-text"
-                role="menuitem"
-                (click)="logout()"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
-                </svg>
-                Sair
-              </button>
-            </div>
-          }
-        </div>
-
       </div>
     </div>
   `,
 })
 export class TopbarComponent {
-  private readonly authStore = inject(AuthStore)
   private readonly router = inject(Router)
 
   readonly menuToggle = output<void>()
-
-  readonly user = this.authStore.user
 
   readonly crumbs = toSignal(
     this.router.events.pipe(
@@ -150,13 +105,6 @@ export class TopbarComponent {
     (localStorage.getItem('theme') as 'light' | 'dark') ?? 'dark'
   )
 
-  readonly dropdownOpen = signal(false)
-
-  readonly initials = computed(() => {
-    const name = this.user()?.name ?? this.user()?.nickname ?? ''
-    return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase() || 'A'
-  })
-
   constructor() {
     effect(() => {
       const t = this.theme()
@@ -165,15 +113,8 @@ export class TopbarComponent {
     })
   }
 
-  toggleDropdown(): void {
-    this.dropdownOpen.update(v => !v)
-  }
-
   toggleTheme(): void {
     this.theme.update(t => t === 'dark' ? 'light' : 'dark')
   }
 
-  logout(): void {
-    this.authStore.logout()
-  }
 }

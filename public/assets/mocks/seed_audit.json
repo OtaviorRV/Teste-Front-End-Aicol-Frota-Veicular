@@ -1,0 +1,262 @@
+[
+  {
+    "id": "a1b2c3d4-0001-0000-0000-000000000001",
+    "timestamp": "2025-05-24T08:02:11.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/auth/login",
+    "entity": "auth",
+    "response_status": 200,
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0002-0000-0000-000000000002",
+    "timestamp": "2025-05-24T08:05:33.000Z",
+    "user": "aivacol",
+    "method": "GET",
+    "endpoint": "/api/vehicles",
+    "entity": "vehicle",
+    "response_status": 200,
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0003-0000-0000-000000000003",
+    "timestamp": "2025-05-24T08:12:47.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/vehicles",
+    "entity": "vehicle",
+    "entity_id": "v-abc-1234",
+    "response_status": 201,
+    "payload": {
+      "after": { "plate": "ABC-1234", "brand": "Toyota", "model": "Corolla", "year": 2022, "status": "available" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0004-0000-0000-000000000004",
+    "timestamp": "2025-05-24T09:01:05.000Z",
+    "user": "admin",
+    "method": "POST",
+    "endpoint": "/api/brands",
+    "entity": "brand",
+    "entity_id": "brand-toyota",
+    "response_status": 201,
+    "payload": {
+      "after": { "id": "brand-toyota", "name": "Toyota" }
+    },
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0005-0000-0000-000000000005",
+    "timestamp": "2025-05-24T09:15:22.000Z",
+    "user": "admin",
+    "method": "POST",
+    "endpoint": "/api/models",
+    "entity": "model",
+    "entity_id": "model-corolla",
+    "response_status": 201,
+    "payload": {
+      "after": { "id": "model-corolla", "name": "Corolla", "brand_id": "brand-toyota" }
+    },
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0006-0000-0000-000000000006",
+    "timestamp": "2025-05-24T10:30:00.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/operations",
+    "entity": "operation",
+    "entity_id": "op-001",
+    "response_status": 201,
+    "payload": {
+      "after": { "vehicle_plate": "ABC-1234", "type": "check_out", "odometer_km": 12500, "notes": "Entrega ao cliente" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0007-0000-0000-000000000007",
+    "timestamp": "2025-05-24T11:00:18.000Z",
+    "user": "aivacol",
+    "method": "PATCH",
+    "endpoint": "/api/vehicles/v-def-5678",
+    "entity": "vehicle",
+    "entity_id": "v-def-5678",
+    "response_status": 200,
+    "payload": {
+      "before": { "status": "available" },
+      "after": { "status": "rented" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0008-0000-0000-000000000008",
+    "timestamp": "2025-05-24T11:45:00.000Z",
+    "user": "aivacol",
+    "method": "GET",
+    "endpoint": "/api/operations?vehicle_plate=ABC-1234",
+    "entity": "operation",
+    "response_status": 200,
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0009-0000-0000-000000000009",
+    "timestamp": "2025-05-24T13:10:55.000Z",
+    "user": "admin",
+    "method": "PATCH",
+    "endpoint": "/api/models/model-corolla",
+    "entity": "model",
+    "entity_id": "model-corolla",
+    "response_status": 200,
+    "payload": {
+      "before": { "name": "Corolla" },
+      "after": { "name": "Corolla Cross" }
+    },
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0010-0000-0000-000000000010",
+    "timestamp": "2025-05-24T14:00:00.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/vehicles",
+    "entity": "vehicle",
+    "entity_id": "v-ghi-9012",
+    "response_status": 400,
+    "payload": {
+      "after": { "plate": "GHI-9012", "brand_id": null }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0011-0000-0000-000000000011",
+    "timestamp": "2025-05-24T14:22:33.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/vehicles",
+    "entity": "vehicle",
+    "entity_id": "v-ghi-9012",
+    "response_status": 201,
+    "payload": {
+      "after": { "plate": "GHI-9012", "brand": "Honda", "model": "Civic", "year": 2023, "status": "available" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0012-0000-0000-000000000012",
+    "timestamp": "2025-05-24T15:05:10.000Z",
+    "user": "admin",
+    "method": "DELETE",
+    "endpoint": "/api/models/model-old",
+    "entity": "model",
+    "entity_id": "model-old",
+    "response_status": 204,
+    "payload": {
+      "before": { "id": "model-old", "name": "Uno", "brand_id": "brand-fiat" }
+    },
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0013-0000-0000-000000000013",
+    "timestamp": "2025-05-24T15:30:00.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/operations",
+    "entity": "operation",
+    "entity_id": "op-002",
+    "response_status": 201,
+    "payload": {
+      "after": { "vehicle_plate": "DEF-5678", "type": "maintenance", "odometer_km": 35000, "notes": "Revisão dos 30k" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0014-0000-0000-000000000014",
+    "timestamp": "2025-05-24T16:00:00.000Z",
+    "user": "aivacol",
+    "method": "GET",
+    "endpoint": "/api/vehicles/v-not-found",
+    "entity": "vehicle",
+    "entity_id": "v-not-found",
+    "response_status": 404,
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0015-0000-0000-000000000015",
+    "timestamp": "2025-05-24T16:45:00.000Z",
+    "user": "admin",
+    "method": "POST",
+    "endpoint": "/api/brands",
+    "entity": "brand",
+    "entity_id": "brand-honda",
+    "response_status": 201,
+    "payload": {
+      "after": { "id": "brand-honda", "name": "Honda" }
+    },
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0016-0000-0000-000000000016",
+    "timestamp": "2025-05-24T17:00:00.000Z",
+    "user": "aivacol",
+    "method": "POST",
+    "endpoint": "/api/operations",
+    "entity": "operation",
+    "entity_id": "op-003",
+    "response_status": 201,
+    "payload": {
+      "after": { "vehicle_plate": "ABC-1234", "type": "check_in", "odometer_km": 13200, "notes": "Retorno do cliente" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0017-0000-0000-000000000017",
+    "timestamp": "2025-05-24T17:30:00.000Z",
+    "user": "aivacol",
+    "method": "PATCH",
+    "endpoint": "/api/vehicles/v-abc-1234",
+    "entity": "vehicle",
+    "entity_id": "v-abc-1234",
+    "response_status": 200,
+    "payload": {
+      "before": { "status": "rented" },
+      "after": { "status": "available" }
+    },
+    "ip": "192.168.1.10"
+  },
+  {
+    "id": "a1b2c3d4-0018-0000-0000-000000000018",
+    "timestamp": "2025-05-24T18:00:00.000Z",
+    "user": "admin",
+    "method": "GET",
+    "endpoint": "/api/audit",
+    "entity": "auth",
+    "response_status": 200,
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0019-0000-0000-000000000019",
+    "timestamp": "2025-05-23T09:00:00.000Z",
+    "user": "admin",
+    "method": "POST",
+    "endpoint": "/api/auth/login",
+    "entity": "auth",
+    "response_status": 200,
+    "ip": "192.168.1.20"
+  },
+  {
+    "id": "a1b2c3d4-0020-0000-0000-000000000020",
+    "timestamp": "2025-05-23T09:30:00.000Z",
+    "user": "admin",
+    "method": "POST",
+    "endpoint": "/api/vehicles",
+    "entity": "vehicle",
+    "entity_id": "v-def-5678",
+    "response_status": 201,
+    "payload": {
+      "after": { "plate": "DEF-5678", "brand": "Ford", "model": "Ka", "year": 2021, "status": "available" }
+    },
+    "ip": "192.168.1.20"
+  }
+]

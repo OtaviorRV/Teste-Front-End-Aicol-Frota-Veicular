@@ -2,9 +2,10 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { EMPTY, Observable, Subject } from 'rxjs'
 import { catchError, switchMap, tap } from 'rxjs/operators'
-import { Vehicle, VehicleFilters, VehicleStatusEvent } from '../models/vehicle.model'
+import { OperationType, Vehicle, VehicleFilters, VehicleStatusEvent } from '../models/vehicle.model'
 import { CreateVehicleDto, UpdateVehicleDto } from '../models/vehicle-dto.models'
 import { VehicleApiService } from '../services/vehicle-api.service'
+import { NEXT_STATUS } from '../utils/vehicle.utils'
 
 @Injectable({ providedIn: 'root' })
 export class VehicleStore {
@@ -108,6 +109,24 @@ export class VehicleStore {
           this.loadVehicles()
         }
       })
+    )
+  }
+
+  registerOperation(dto: {
+    vehicleId: string
+    type: OperationType
+    odometerKm?: number | null
+    expectedReturnDate?: string | null
+    notes?: string | null
+  }): void {
+    const newStatus = NEXT_STATUS[dto.type]
+    this.vehicles.update(list =>
+      list.map(v => v.id === dto.vehicleId ? {
+        ...v,
+        status: newStatus,
+        operation_count: (v.operation_count ?? 0) + 1,
+        last_odometer_km: dto.odometerKm != null ? dto.odometerKm : v.last_odometer_km,
+      } : v)
     )
   }
 

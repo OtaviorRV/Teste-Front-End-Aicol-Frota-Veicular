@@ -9,7 +9,7 @@ import {
   VehicleOperationFilters,
 } from '../models/history.models'
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class HistoryStore {
   private readonly api = inject(HistoryApiService)
   private readonly destroyRef = inject(DestroyRef)
@@ -44,7 +44,7 @@ export class HistoryStore {
   }
 
   applyFilter(partial: Partial<VehicleOperationFilters>): void {
-    this.filters.update(f => ({ ...f, ...partial, page: 1 }))
+    this.filters.update(f => ({ ...f, page: 1, ...partial }))
     this.loadOperations()
   }
 
