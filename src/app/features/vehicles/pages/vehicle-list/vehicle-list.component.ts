@@ -155,7 +155,7 @@ import {
 
         @if (!vehicleStore.loadError() && vehicleStore.total() > 0) {
           <div class="pagination">
-            <span [innerHTML]="rangeText()"></span>
+            <span>Exibindo <strong>{{ rangeStart() }}–{{ rangeEnd() }}</strong> de <strong>{{ vehicleStore.total() }}</strong></span>
             <div class="controls">
               <div class="select-wrap" style="width: auto">
                 <select
@@ -298,13 +298,14 @@ export class VehicleListComponent implements OnInit, AfterViewInit, OnDestroy {
     Math.max(1, Math.ceil(this.vehicleStore.total() / this.vehicleStore.filters().page_size))
   )
 
-  protected readonly rangeText = computed(() => {
+  protected readonly rangeStart = computed(() => {
     const { page, page_size } = this.vehicleStore.filters()
-    const total = this.vehicleStore.total()
-    if (total === 0) return ''
-    const start = (page - 1) * page_size + 1
-    const end = Math.min(page * page_size, total)
-    return `Exibindo <strong style="font-weight:600;color:var(--text)">${start}–${end}</strong> de <strong style="font-weight:600;color:var(--text)">${total}</strong>`
+    return (page - 1) * page_size + 1
+  })
+
+  protected readonly rangeEnd = computed(() => {
+    const { page, page_size } = this.vehicleStore.filters()
+    return Math.min(page * page_size, this.vehicleStore.total())
   })
 
   protected readonly counterText = computed(() => {
