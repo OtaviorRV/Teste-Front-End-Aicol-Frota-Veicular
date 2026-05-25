@@ -2,13 +2,9 @@ import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { Observable, map, of, switchMap } from 'rxjs'
 import { environment } from '../../../../environments/environment'
+import { PaginatedResponse } from '../../../shared/models/api.models'
 import { Vehicle, VehicleFilters } from '../models/vehicle.model'
 import { CreateVehicleDto, UpdateVehicleDto } from '../models/vehicle-dto.models'
-
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-}
 
 @Injectable({ providedIn: 'root' })
 export class VehicleApiService {

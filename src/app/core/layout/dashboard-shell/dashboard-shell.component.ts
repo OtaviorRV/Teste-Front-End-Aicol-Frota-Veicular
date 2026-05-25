@@ -30,7 +30,7 @@ import { ToastHostComponent } from '../../toast/toast-host.component'
       ></div>
     }
 
-    <aside [class]="sidebarClass()">
+    <aside [class]="sidebarClass()" style="grid-area: sidebar">
       <app-sidebar />
     </aside>
 

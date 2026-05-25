@@ -1,6 +1,37 @@
 import { BadgeVariant } from '../../../shared/components/atoms/badge/badge.component'
-import { Vehicle, VehicleStatus } from '../models/vehicle.model'
+import { OperationType, Vehicle, VehicleStatus } from '../models/vehicle.model'
 import { PlateFormatPipe } from '../../../shared/pipes/plate-format.pipe'
+
+export const ALLOWED_OPERATIONS: Record<VehicleStatus, OperationType[]> = {
+  disponivel:    ['check_out', 'maintenance', 'deactivation'],
+  em_locacao:    ['check_in'],
+  em_manutencao: ['check_in', 'deactivation'],
+  inativo:       ['reactivation'],
+}
+
+export const NEXT_STATUS: Record<OperationType, VehicleStatus> = {
+  check_out:    'em_locacao',
+  check_in:     'disponivel',
+  maintenance:  'em_manutencao',
+  deactivation: 'inativo',
+  reactivation: 'disponivel',
+}
+
+export const OPERATION_LABEL: Record<OperationType, string> = {
+  check_out:    'Saída',
+  check_in:     'Entrada',
+  maintenance:  'Manutenção',
+  deactivation: 'Desativação',
+  reactivation: 'Reativação',
+}
+
+export const OPERATION_VARIANT: Record<OperationType, BadgeVariant> = {
+  check_out:    'info',
+  check_in:     'success',
+  maintenance:  'warning',
+  deactivation: 'danger',
+  reactivation: 'success',
+}
 
 export function vehicleStatusVariant(status: VehicleStatus): BadgeVariant {
   const map: Record<VehicleStatus, BadgeVariant> = {
@@ -24,6 +55,11 @@ export function vehicleStatusLabel(status: VehicleStatus): string {
 
 export function formatPlate(plate: string, separator: '-' | '·' | ' ' = '·'): string {
   return new PlateFormatPipe().transform(plate, separator)
+}
+
+export function formatKm(km: number | undefined | null): string {
+  if (km == null) return '—'
+  return km.toLocaleString('pt-BR') + ' km'
 }
 
 export function canDeleteVehicle(vehicle: Vehicle): { allowed: boolean; reason?: string } {

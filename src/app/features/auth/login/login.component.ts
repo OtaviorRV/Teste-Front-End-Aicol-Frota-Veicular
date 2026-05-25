@@ -16,63 +16,71 @@ import { InputFieldComponent } from '../../../shared/components/atoms/input-fiel
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, ButtonComponent, InputFieldComponent],
   template: `
-    <div class="w-full max-w-sm rounded-[9px] border border-border bg-surface-raised p-8">
+    <div class="auth-card">
 
       <div class="auth-brand">
         <div class="brand-mark" style="width: 26px; height: 26px; font-size: 13px">A</div>
-        <span class="brand-name">Aicol</span>
-        <span class="badge outline" style="margin-left: auto; font-size: 10px">Gestão de Frota</span>
+        <span class="name">Aicol</span>
+        <span class="badge outline" style="font-size: 10px">Gestão de Frota</span>
       </div>
       <h1 class="auth-title">Bem-vindo de volta</h1>
       <p class="auth-subtitle">Entre com suas credenciais para acessar o painel.</p>
 
       @if (loginError()) {
-        <div
-          class="mb-4 rounded-[5px] border border-danger bg-danger-soft px-3 py-2 text-[13px] text-danger-text"
-          role="alert"
-        >
-          {{ loginError() }}
+        <div class="alert danger" style="margin-bottom: 14px" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div>{{ loginError() }}</div>
         </div>
       }
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" noValidate>
 
         <app-input-field
           label="E-mail"
           type="email"
           placeholder="aivacol@aicol.com.br"
+          autocomplete="username"
           formControlName="email"
           [required]="true"
           [error]="emailError()"
         />
 
-        <div class="relative">
-          <app-input-field
-            label="Senha"
-            [type]="showPassword() ? 'text' : 'password'"
-            placeholder="••••••••"
-            formControlName="password"
-            [required]="true"
-          />
+        <app-input-field
+          label="Senha"
+          [type]="showPassword() ? 'text' : 'password'"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          formControlName="password"
+          [required]="true"
+          [hasTrailing]="true"
+        >
           <button
+            trailingButton
             type="button"
-            class="absolute right-2.5 top-[26px] text-muted transition-colors hover:text-text"
+            class="btn icon"
             (click)="showPassword.set(!showPassword())"
             [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            [attr.title]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
           >
             @if (showPassword()) {
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
-                <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                <path d="M10.73 5.08A11 11 0 0 1 12 5c7 0 10 7 10 7a13 13 0 0 1-1.67 2.68"/>
+                <path d="M6.61 6.61A13 13 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                <line x1="2" y1="2" x2="22" y2="22"/>
               </svg>
             } @else {
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
               </svg>
             }
           </button>
-        </div>
+        </app-input-field>
 
         <app-button
           type="submit"

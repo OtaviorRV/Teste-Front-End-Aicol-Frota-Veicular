@@ -9,32 +9,21 @@ import { ConfirmOptions } from '../../../../core/dialog/dialog.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonComponent],
   template: `
-    <div class="flex flex-col rounded-[8px] border border-border bg-surface-raised shadow-[var(--shadow-overlay)] max-h-[90vh] w-full overflow-hidden">
+    <div class="dialog">
 
-      <div class="px-5 pb-1 pt-4">
-        <h2 class="text-[15px] font-semibold text-text leading-snug">
-          {{ data.title }}
-        </h2>
+      <div class="dialog-header">
+        <h2 class="dialog-title">{{ data.title }}</h2>
       </div>
 
-      <div class="px-5 py-3">
-        <p class="text-[13px] text-muted leading-relaxed">{{ data.message }}</p>
+      <div class="dialog-body">
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.55">{{ data.message }}</p>
       </div>
 
-      <div class="flex items-center justify-end gap-2 border-t border-border bg-surface-elevated px-5 py-3">
-        <app-button
-          variant="secondary"
-          size="sm"
-          (clicked)="cancel()"
-        >
+      <div class="dialog-footer">
+        <app-button variant="secondary" size="sm" (clicked)="cancel()">
           {{ data.cancelLabel ?? 'Cancelar' }}
         </app-button>
-
-        <app-button
-          [variant]="data.variant === 'danger' ? 'danger' : 'primary'"
-          size="sm"
-          (clicked)="confirm()"
-        >
+        <app-button [variant]="data.variant === 'danger' ? 'danger' : 'primary'" size="sm" (clicked)="confirm()">
           {{ data.confirmLabel ?? 'Confirmar' }}
         </app-button>
       </div>

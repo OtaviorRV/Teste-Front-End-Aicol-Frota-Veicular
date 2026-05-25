@@ -22,7 +22,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
   template: `
     <div class="flex flex-col gap-1">
       @if (label()) {
-        <label [for]="inputId" class="text-[12px] font-medium text-text leading-none">
+        <label [for]="inputId" class="text-[12px] font-medium text-muted leading-none">
           {{ label() }}
           @if (required()) {
             <span class="ml-0.5 text-danger" aria-hidden="true">*</span>
@@ -43,6 +43,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
           [placeholder]="placeholder()"
           [disabled]="innerDisabled()"
           [value]="innerValue()"
+          [attr.autocomplete]="autocomplete() || null"
           [attr.aria-invalid]="error() ? true : null"
           [attr.aria-describedby]="error() ? errorId : null"
           [class]="inputClass()"
@@ -52,10 +53,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
         @if (pending()) {
           <div class="absolute right-2 flex items-center">
-            <span
-              class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-transparent"
-              aria-hidden="true"
-            ></span>
+            <span class="spinner" aria-hidden="true"></span>
           </div>
         } @else {
           <div class="absolute right-0 flex items-center">
@@ -65,7 +63,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
       </div>
 
       @if (error()) {
-        <p [id]="errorId" class="text-[11.5px] text-danger leading-none" role="alert">
+        <p [id]="errorId" class="text-[11.5px] text-danger-text leading-none" role="alert">
           {{ error() }}
         </p>
       }
@@ -78,13 +76,15 @@ export class InputFieldComponent implements ControlValueAccessor {
   protected readonly inputId = `input-field-${++InputFieldComponent.nextId}`
   protected readonly errorId = `${this.inputId}-error`
 
-  readonly label       = input<string>('')
-  readonly error       = input<string | null>(null)
-  readonly type        = input<string>('text')
-  readonly placeholder = input<string>('')
-  readonly pending     = input(false, { transform: booleanAttribute })
-  readonly required    = input(false, { transform: booleanAttribute })
-  readonly hasLeading  = input(false, { transform: booleanAttribute })
+  readonly label        = input<string>('')
+  readonly error        = input<string | null>(null)
+  readonly type         = input<string>('text')
+  readonly placeholder  = input<string>('')
+  readonly autocomplete = input<string>('')
+  readonly pending      = input(false, { transform: booleanAttribute })
+  readonly required     = input(false, { transform: booleanAttribute })
+  readonly hasLeading   = input(false, { transform: booleanAttribute })
+  readonly hasTrailing  = input(false, { transform: booleanAttribute })
 
   protected readonly innerValue    = signal('')
   protected readonly innerDisabled = signal(false)
@@ -100,7 +100,7 @@ export class InputFieldComponent implements ControlValueAccessor {
       'focus:border-border-focus focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]',
       'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface-sunken',
       this.hasLeading() ? 'pl-8'   : 'pl-2.5',
-      this.pending()    ? 'pr-8'   : 'pr-2.5',
+      (this.pending() || this.hasTrailing()) ? 'pr-8' : 'pr-2.5',
     ]
 
     const borderClass = this.error()

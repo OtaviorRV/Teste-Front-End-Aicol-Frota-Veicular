@@ -51,6 +51,19 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-sunken) 50%, var(--bg-elevated) 100%);
+  background-size: 200px 100%;
+  border-radius: 4px;
+  animation: shimmer 1.4s infinite linear;
+}
+
 /* CDK Dialog — backdrop */
 @keyframes fadeIn {
   from { opacity: 0; }

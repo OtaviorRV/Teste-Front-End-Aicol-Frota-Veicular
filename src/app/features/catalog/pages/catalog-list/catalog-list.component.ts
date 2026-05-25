@@ -33,14 +33,14 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DataTableComponent, ButtonComponent],
   template: `
-    <div class="flex flex-col h-full">
+    <div class="page">
 
-      <div class="flex items-center justify-between px-6 py-5 border-b border-border">
+      <div class="page-header">
         <div>
-          <h1 class="text-[17px] font-semibold text-text">
+          <h1 class="page-title">
             {{ entity() === 'brands' ? 'Marcas' : 'Modelos' }}
           </h1>
-          <p class="text-[12.5px] text-muted mt-0.5">
+          <p class="page-subtitle">
             {{ entity() === 'brands'
               ? catalogStore.brands().length + ' marcas cadastradas'
               : catalogStore.models().length + ' modelos cadastrados' }}
@@ -51,25 +51,29 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
         </app-button>
       </div>
 
-      @if (entity() === 'brands') {
-        <app-data-table
-          [rows]="catalogStore.brands()"
-          [columns]="brandColumns()"
-          [loading]="catalogStore.loading()"
-        />
-      } @else {
-        <app-data-table
-          [rows]="catalogStore.models()"
-          [columns]="modelColumns()"
-          [loading]="catalogStore.loading()"
-        />
-      }
+      <div class="card">
+        @if (entity() === 'brands') {
+          <app-data-table
+            [rows]="catalogStore.brands()"
+            [columns]="brandColumns()"
+            [loading]="catalogStore.loading()"
+            [noBorder]="true"
+          />
+        } @else {
+          <app-data-table
+            [rows]="catalogStore.models()"
+            [columns]="modelColumns()"
+            [loading]="catalogStore.loading()"
+            [noBorder]="true"
+          />
+        }
+      </div>
 
     </div>
 
     <!-- Brand actions template -->
     <ng-template #brandActionsTemplate let-row>
-      <div class="flex items-center justify-end gap-1">
+      <div class="cell-actions">
         <app-button variant="ghost" size="sm" (clicked)="openBrandForm(row)">Editar</app-button>
         <app-button
           variant="ghost"
@@ -82,7 +86,7 @@ import { ModelFormComponent, ModelFormData } from './model-form.component'
 
     <!-- Model actions template -->
     <ng-template #modelActionsTemplate let-row>
-      <div class="flex items-center justify-end gap-1">
+      <div class="cell-actions">
         <app-button variant="ghost" size="sm" (clicked)="openModelForm(row)">Editar</app-button>
         <app-button
           variant="ghost"

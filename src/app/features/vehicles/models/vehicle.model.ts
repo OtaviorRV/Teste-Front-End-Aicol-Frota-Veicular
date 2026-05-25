@@ -1,5 +1,7 @@
 export type VehicleStatus = 'disponivel' | 'em_locacao' | 'em_manutencao' | 'inativo'
 
+export type OperationType = 'check_out' | 'check_in' | 'maintenance' | 'deactivation' | 'reactivation'
+
 export interface Vehicle {
   id: string
   license_plate: string
